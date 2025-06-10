@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "description"
 };
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+export default function ProtectedLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
       <body>{children}</body>
