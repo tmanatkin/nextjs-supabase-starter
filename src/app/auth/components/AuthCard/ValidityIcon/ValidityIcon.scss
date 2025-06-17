@@ -1,0 +1,42 @@
+.auth-card-form-validity-icon {
+  @include flex-center($direction: row, $justify: baseline);
+  gap: 0.2rem;
+
+  &-label {
+    font-weight: 700;
+    color: $color-foreground-muted;
+  }
+
+  &-svg {
+    height: 1.25rem;
+    width: 1.25rem;
+
+    &-valid {
+      stroke: $color-valid;
+    }
+
+    &-warning {
+      stroke: $color-warning;
+    }
+
+    &-error {
+      stroke: $color-error;
+    }
+
+    &-neutral {
+      stroke: $color-foreground-muted;
+    }
+  }
+
+  &-next-to-input {
+    padding: 0 0.5rem;
+    border: 1px solid $color-foreground-muted;
+    border-left: 0;
+    border-radius: 0 2px 2px 0;
+    transform: translate(-2px);
+    z-index: 0;
+    svg {
+      transform: translate(1px);
+    }
+  }
+}

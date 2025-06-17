@@ -1,0 +1,9 @@
+body {
+  font-family: "Open Sans", sans-serif; // font-weight: 300-800
+  background-color: $color-background;
+  color: $color-foreground;
+
+  @include respond(sm) {
+    background-color: $color-background-elevated;
+  }
+}

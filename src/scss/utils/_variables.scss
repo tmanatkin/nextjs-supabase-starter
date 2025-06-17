@@ -1,0 +1,40 @@
+/* COLORS */
+
+// SLS COLORS
+// $burgundy: #400804;
+// $dark-red: #630700;
+// $dark-blue: #03044b;
+
+// primary
+$color-primary: #c02626;
+$color-primary-weak: #d14343;
+$color-primary-strong: #a32929;
+$color-primary-tint: #fde8e8;
+
+// secondary
+$color-secondary: #5f719b;
+$color-secondary-weak: #8491b3;
+$color-secondary-strong: #4b5a84;
+$color-secondary-tint: #ebeff6;
+
+// background
+$color-background: #f7f7f7;
+$color-background-elevated: #fcfcfc;
+$color-background-muted: #ebebeb;
+
+// foreground
+$color-foreground: #262626;
+$color-foreground-muted: #808080;
+$color-foreground-shadow: #0000000d;
+$shadow-offset-y: 10px;
+$shadow-blur-radius: 15px;
+
+// utility
+$color-valid: #2e7d32;
+$color-warning: #ed6c02;
+$color-error: #d32f2f;
+
+/* BREAKPOINTS */
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;

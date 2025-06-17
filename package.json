@@ -20,8 +20,11 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/webpack": "^5.28.5",
     "eslint": "^9",
     "eslint-config-next": "15.3.3",
-    "typescript": "^5"
+    "sass-loader": "^16.0.5",
+    "typescript": "^5",
+    "webpack": "^5.99.9"
   }
 }
