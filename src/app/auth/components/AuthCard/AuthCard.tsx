@@ -3,6 +3,7 @@
 import "./authCard.scss";
 import ValidityIcon from "./ValidityIcon/ValidityIcon";
 import { useState, useEffect } from "react";
+import useDebounce from "../../../../lib/hooks/useDebounce";
 import { supabase } from "../../../../lib/supabaseClient";
 import SubmitButton from "./SubmitButton/SubmitButton";
 
@@ -13,9 +14,14 @@ type AuthCardProps = {
 export default function AuthCard({ type }: AuthCardProps) {
   const authButtonLabel = type === "login" ? "Log In" : "Sign Up";
   const authTitle = type === "login" ? "Welcome Back" : "Get Started";
+
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
+
+  const debouncedEmail = useDebounce(email, 300); // 300ms delay
+  const debouncedPassword = useDebounce(password, 300);
+  const debouncedConfirmPassword = useDebounce(confirmPassword, 300);
 
   const [emailTouched, setEmailTouched] = useState(false);
   const [passwordTouched, setPasswordTouched] = useState(false);
@@ -55,26 +61,47 @@ export default function AuthCard({ type }: AuthCardProps) {
     setPasswordMatch(confirmPassword === password && confirmPassword !== "" ? "valid" : "warning");
   };
 
+  // Update the useEffect hooks to use debounced values
   useEffect(() => {
     if (type === "signup" && emailTouched) {
       validateEmail();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [email, emailTouched]);
+  }, [debouncedEmail, emailTouched]); // Use debouncedEmail instead of email
 
   useEffect(() => {
     if (type === "signup" && passwordTouched) {
       validatePassword();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [password, passwordTouched]);
+  }, [debouncedPassword, passwordTouched]); // Use debouncedPassword instead of password
 
   useEffect(() => {
     if (type === "signup" && confirmPasswordTouched) {
       validateConfirmPassword();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [password, confirmPassword, confirmPasswordTouched]);
+  }, [debouncedPassword, debouncedConfirmPassword, confirmPasswordTouched]);
+
+  // useEffect(() => {
+  //   if (type === "signup" && emailTouched) {
+  //     validateEmail();
+  //   }
+  // }, [email, emailTouched]);
+
+  // useEffect(() => {
+  //   if (type === "signup" && passwordTouched) {
+  //     validatePassword();
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [password, passwordTouched]);
+
+  // useEffect(() => {
+  //   if (type === "signup" && confirmPasswordTouched) {
+  //     validateConfirmPassword();
+  //   }
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // }, [password, confirmPassword, confirmPasswordTouched]);
 
   // check if any part of form is empty
   const isFormEmpty = (): boolean => {
