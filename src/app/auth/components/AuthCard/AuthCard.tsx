@@ -61,7 +61,6 @@ export default function AuthCard({ type }: AuthCardProps) {
     setPasswordMatch(confirmPassword === password && confirmPassword !== "" ? "valid" : "warning");
   };
 
-  // Update the useEffect hooks to use debounced values
   useEffect(() => {
     if (type === "signup" && emailTouched) {
       validateEmail();
@@ -82,26 +81,6 @@ export default function AuthCard({ type }: AuthCardProps) {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedPassword, debouncedConfirmPassword, confirmPasswordTouched]);
-
-  // useEffect(() => {
-  //   if (type === "signup" && emailTouched) {
-  //     validateEmail();
-  //   }
-  // }, [email, emailTouched]);
-
-  // useEffect(() => {
-  //   if (type === "signup" && passwordTouched) {
-  //     validatePassword();
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [password, passwordTouched]);
-
-  // useEffect(() => {
-  //   if (type === "signup" && confirmPasswordTouched) {
-  //     validateConfirmPassword();
-  //   }
-  //   // eslint-disable-next-line react-hooks/exhaustive-deps
-  // }, [password, confirmPassword, confirmPasswordTouched]);
 
   // check if any part of form is empty
   const isFormEmpty = (): boolean => {
