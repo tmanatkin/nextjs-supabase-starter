@@ -4,6 +4,7 @@ import "./inputIconGroup.scss";
 
 type InputIconGroupProps = {
   label?: string;
+  hideIcons?: boolean;
   validityStatuses: {
     label: string;
     status: ValidityStatus;
@@ -11,7 +12,7 @@ type InputIconGroupProps = {
   children: React.ReactNode;
 };
 
-export default function InputIconGroup({ label, validityStatuses, children }: InputIconGroupProps) {
+export default function InputIconGroup({ label, hideIcons, validityStatuses, children }: InputIconGroupProps) {
   const className = label ? label.toLowerCase().replace(/ /g, "-") : "";
 
   return (
@@ -23,12 +24,13 @@ export default function InputIconGroup({ label, validityStatuses, children }: In
       )}
 
       {children}
-
-      <div className="auth-card-form-input-icon-group-icons">
-        {validityStatuses.map(({ label, status }) => (
-          <ValidityIcon key={label} status={status} label={label} />
-        ))}
-      </div>
+      {!hideIcons && (
+        <div className="auth-card-form-input-icon-group-icons">
+          {validityStatuses.map(({ label, status }) => (
+            <ValidityIcon key={label} status={status} label={label} />
+          ))}
+        </div>
+      )}
     </div>
   );
 }

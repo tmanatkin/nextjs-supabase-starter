@@ -5,6 +5,7 @@ import VisibilityIcon from "../VisibilityIcon/VisibilityIcon";
 
 type BaseProps = {
   label?: string;
+  hideIcon?: boolean;
   children: React.ReactNode;
 };
 
@@ -20,7 +21,7 @@ type InputSideIconProps =
     });
 
 export default function InputSideIcon(props: InputSideIconProps) {
-  const { label, children, mode } = props;
+  const { label, hideIcon = false, children, mode } = props;
   const className = label ? label.toLowerCase().replace(/ /g, "-") : "";
 
   return (
@@ -33,11 +34,12 @@ export default function InputSideIcon(props: InputSideIconProps) {
 
       <div className="auth-card-form-input-side-icon-container">
         {children}
-        {mode === "validityCheck" ? (
-          <ValidityIcon status={props.status} />
-        ) : (
-          <VisibilityIcon toggleIcon={props.toggleIcon} onClick={props.onToggle} />
-        )}
+        {!hideIcon &&
+          (mode === "validityCheck" ? (
+            <ValidityIcon status={props.status} />
+          ) : (
+            <VisibilityIcon toggleIcon={props.toggleIcon} onClick={props.onToggle} />
+          ))}
       </div>
     </div>
   );

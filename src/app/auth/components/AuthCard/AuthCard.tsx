@@ -42,13 +42,14 @@ export default function AuthCard({ type }: AuthCardProps) {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   // validate email (x@x.x)
-  const validateEmail = () => {
+  const validateEmail = (): boolean => {
     const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
     setEmailValidity(validEmail ? "valid" : "warning");
+    return validEmail;
   };
 
   // validate password (length, uppercase, number, special char)
-  const validatePassword = () => {
+  const validatePassword = (): boolean => {
     const hasUpper = /[A-Z]/.test(password);
     const hasNumber = /\d/.test(password);
     const hasSpecial = /[^A-Za-z0-9]/.test(password);
@@ -59,11 +60,14 @@ export default function AuthCard({ type }: AuthCardProps) {
     setPasswordNumber(hasNumber ? "valid" : "warning");
     setPasswordSpecial(hasSpecial ? "valid" : "warning");
     setPasswordLength(lengthValid ? "valid" : "warning");
+    return hasUpper && hasNumber && hasSpecial && lengthValid;
   };
 
   // validate confirm password (match password)
-  const validateConfirmPassword = () => {
-    setPasswordMatch(confirmPassword === password && confirmPassword !== "" ? "valid" : "warning");
+  const validateConfirmPassword = (): boolean => {
+    const validConfirmPassword = confirmPassword === password && confirmPassword !== "";
+    setPasswordMatch(validConfirmPassword ? "valid" : "warning");
+    return validConfirmPassword;
   };
 
   // debounce email validation for warnings
@@ -98,7 +102,7 @@ export default function AuthCard({ type }: AuthCardProps) {
     } else if (!password) {
       setErrorMessage("Password is required");
       return false;
-    } else if (!confirmPassword) {
+    } else if (!confirmPassword && type === "signup") {
       setErrorMessage("Confirm Password is required");
       return false;
     }
@@ -115,19 +119,14 @@ export default function AuthCard({ type }: AuthCardProps) {
       return;
     }
 
-    // run all validations again
-    validateEmail();
-    validatePassword();
-    validateConfirmPassword();
-
-    // block submission if any validity check fails
-    if (emailValidity !== "valid") {
+    // run all validations again, block submission if any fail
+    if (!validateEmail()) {
       setErrorMessage("Enter a valid email");
       return;
-    } else if (passwordUpper !== "valid" || passwordNumber !== "valid" || passwordSpecial !== "valid" || passwordLength !== "valid") {
+    } else if (!validatePassword()) {
       setErrorMessage("Enter a valid password");
       return;
-    } else if (passwordMatch !== "valid") {
+    } else if (!validateConfirmPassword() && type === "signup") {
       setErrorMessage("Passwords must match");
       return;
     }
@@ -153,7 +152,7 @@ export default function AuthCard({ type }: AuthCardProps) {
     <div className="auth-card">
       <h2 className="auth-card-title">{authTitle}</h2>
       <form className="auth-card-form" onSubmit={handleSubmit}>
-        <InputSideIcon label="Email" mode="validityCheck" status={emailValidity}>
+        <InputSideIcon label="Email" hideIcon={type === "login"} mode="validityCheck" status={emailValidity}>
           <input
             className="auth-card-form-input"
             id="auth-card-form-email"
@@ -165,6 +164,7 @@ export default function AuthCard({ type }: AuthCardProps) {
         </InputSideIcon>
 
         <InputIconGroup
+          hideIcons={type === "login"}
           validityStatuses={[
             { label: "8 Characters", status: passwordLength },
             { label: "Uppercase", status: passwordUpper },
@@ -185,20 +185,20 @@ export default function AuthCard({ type }: AuthCardProps) {
             />
           </InputSideIcon>
         </InputIconGroup>
-
-        <InputSideIcon label="Confirm Password" mode="validityCheck" status={passwordMatch}>
-          <input
-            className="auth-card-form-input"
-            id="auth-card-form-confirm-password"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            onFocus={() => {
-              setConfirmPasswordTouched(true);
-            }}
-          />
-        </InputSideIcon>
-
+        {type === "signup" && (
+          <InputSideIcon label="Confirm Password" mode="validityCheck" status={passwordMatch}>
+            <input
+              className="auth-card-form-input"
+              id="auth-card-form-confirm-password"
+              type="password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              onFocus={() => {
+                setConfirmPasswordTouched(true);
+              }}
+            />
+          </InputSideIcon>
+        )}
         <SubmitButton label={authButtonLabel}></SubmitButton>
         {errorMessage && <Toast message={errorMessage} type="error" onClose={() => setErrorMessage(null)} duration={5000} />}
       </form>
