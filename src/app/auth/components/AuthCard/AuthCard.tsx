@@ -9,6 +9,7 @@ import SubmitButton from "./SubmitButton/SubmitButton";
 import Toast from "../../../../components/Toast/Toast";
 import InputSideIcon from "./InputSideIcon/InputSideIcon";
 import InputIconGroup from "./InputIconGroup/InputIconGroup";
+import Link from "next/link";
 
 type AuthCardProps = {
   type: "login" | "signup";
@@ -200,6 +201,19 @@ export default function AuthCard({ type }: AuthCardProps) {
           </InputSideIcon>
         )}
         <SubmitButton label={authButtonLabel}></SubmitButton>
+        <p className="switch-auth-link">
+          {type === "login" ? (
+            <>
+              {"Don't have an account? "}
+              <Link href="/auth/signup">Sign Up</Link>
+            </>
+          ) : (
+            <>
+              {"Already have an account? "}
+              <Link href="/auth/login">Log In</Link>
+            </>
+          )}
+        </p>
         {errorMessage && <Toast message={errorMessage} type="error" onClose={() => setErrorMessage(null)} duration={5000} />}
       </form>
     </div>

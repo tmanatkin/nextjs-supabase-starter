@@ -6,4 +6,13 @@ body {
   @include respond(sm) {
     background-color: $color-background-elevated;
   }
+
+  a {
+    color: $color-foreground;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $color-foreground-muted;
+    }
+  }
 }
