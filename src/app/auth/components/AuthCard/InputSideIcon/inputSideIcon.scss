@@ -9,6 +9,16 @@
     align-items: stretch;
     width: 100%;
 
+    input {
+      padding: 0 calc(20px + 1rem - 1px) 0 0.7rem; // icon width + icon margin - right border width
+    }
+
+    &-icon-hidden {
+      input {
+        padding: 0 0.7rem;
+      }
+    }
+
     .auth-card-form-icon {
       position: absolute;
       right: 0;

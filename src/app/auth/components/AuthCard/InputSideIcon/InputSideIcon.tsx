@@ -32,7 +32,7 @@ export default function InputSideIcon(props: InputSideIconProps) {
         </label>
       )}
 
-      <div className="auth-card-form-input-side-icon-container">
+      <div className={`auth-card-form-input-side-icon-container ${hideIcon ? "auth-card-form-input-side-icon-container-icon-hidden" : ""}`}>
         {children}
         {!hideIcon &&
           (mode === "validityCheck" ? (
