@@ -1,11 +1,14 @@
 "use client";
 
 import "./authCard.scss";
-import ValidityIcon from "./ValidityIcon/ValidityIcon";
+import { ValidityStatus } from "@/types/ValidityStatus";
 import { useState, useEffect } from "react";
-import useDebounce from "../../../../lib/hooks/useDebounce";
+import useDebounce from "../../../../hooks/useDebounce";
 import { supabase } from "../../../../lib/supabaseClient";
 import SubmitButton from "./SubmitButton/SubmitButton";
+import Toast from "../../../../components/Toast/Toast";
+import InputSideIcon from "./InputSideIcon/InputSideIcon";
+import InputIconGroup from "./InputIconGroup/InputIconGroup";
 
 type AuthCardProps = {
   type: "login" | "signup";
@@ -19,7 +22,7 @@ export default function AuthCard({ type }: AuthCardProps) {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
-  const debouncedEmail = useDebounce(email, 300); // 300ms delay
+  const debouncedEmail = useDebounce(email, 300);
   const debouncedPassword = useDebounce(password, 300);
   const debouncedConfirmPassword = useDebounce(confirmPassword, 300);
 
@@ -27,12 +30,14 @@ export default function AuthCard({ type }: AuthCardProps) {
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
 
-  const [emailValidity, setEmailValidity] = useState<"neutral" | "valid" | "error" | "warning">("neutral");
-  const [passwordUpper, setPasswordUpper] = useState<"neutral" | "valid" | "error" | "warning">("neutral");
-  const [passwordNumber, setPasswordNumber] = useState<"neutral" | "valid" | "error" | "warning">("neutral");
-  const [passwordSpecial, setPasswordSpecial] = useState<"neutral" | "valid" | "error" | "warning">("neutral");
-  const [passwordLength, setPasswordLength] = useState<"neutral" | "valid" | "error" | "warning">("neutral");
-  const [passwordMatch, setPasswordMatch] = useState<"neutral" | "valid" | "error" | "warning">("neutral");
+  const [emailValidity, setEmailValidity] = useState<ValidityStatus>("neutral");
+  const [passwordUpper, setPasswordUpper] = useState<ValidityStatus>("neutral");
+  const [passwordNumber, setPasswordNumber] = useState<ValidityStatus>("neutral");
+  const [passwordSpecial, setPasswordSpecial] = useState<ValidityStatus>("neutral");
+  const [passwordLength, setPasswordLength] = useState<ValidityStatus>("neutral");
+  const [passwordMatch, setPasswordMatch] = useState<ValidityStatus>("neutral");
+
+  const [passwordVisible, setPasswordVisible] = useState(false);
 
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
@@ -61,6 +66,7 @@ export default function AuthCard({ type }: AuthCardProps) {
     setPasswordMatch(confirmPassword === password && confirmPassword !== "" ? "valid" : "warning");
   };
 
+  // debounce email validation for warnings
   useEffect(() => {
     if (type === "signup" && emailTouched) {
       validateEmail();
@@ -68,6 +74,7 @@ export default function AuthCard({ type }: AuthCardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedEmail, emailTouched]); // Use debouncedEmail instead of email
 
+  // debounce password validation for warnings
   useEffect(() => {
     if (type === "signup" && passwordTouched) {
       validatePassword();
@@ -75,6 +82,7 @@ export default function AuthCard({ type }: AuthCardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedPassword, passwordTouched]); // Use debouncedPassword instead of password
 
+  // debounce confirm password validation for warnings
   useEffect(() => {
     if (type === "signup" && confirmPasswordTouched) {
       validateConfirmPassword();
@@ -84,14 +92,14 @@ export default function AuthCard({ type }: AuthCardProps) {
 
   // check if any part of form is empty
   const isFormEmpty = (): boolean => {
-    if (!email && !password) {
-      setErrorMessage("Email and password are required");
-      return false;
-    } else if (!email) {
+    if (!email) {
       setErrorMessage("Email is required");
       return false;
     } else if (!password) {
       setErrorMessage("Password is required");
+      return false;
+    } else if (!confirmPassword) {
+      setErrorMessage("Confirm Password is required");
       return false;
     }
     return true;
@@ -104,6 +112,23 @@ export default function AuthCard({ type }: AuthCardProps) {
 
     // return early if form is empty
     if (!isFormEmpty()) {
+      return;
+    }
+
+    // run all validations again
+    validateEmail();
+    validatePassword();
+    validateConfirmPassword();
+
+    // block submission if any validity check fails
+    if (emailValidity !== "valid") {
+      setErrorMessage("Enter a valid email");
+      return;
+    } else if (passwordUpper !== "valid" || passwordNumber !== "valid" || passwordSpecial !== "valid" || passwordLength !== "valid") {
+      setErrorMessage("Enter a valid password");
+      return;
+    } else if (passwordMatch !== "valid") {
+      setErrorMessage("Passwords must match");
       return;
     }
 
@@ -128,64 +153,54 @@ export default function AuthCard({ type }: AuthCardProps) {
     <div className="auth-card">
       <h2 className="auth-card-title">{authTitle}</h2>
       <form className="auth-card-form" onSubmit={handleSubmit}>
-        <label className="auth-card-form-label" htmlFor="email">
-          Email
-        </label>
-        <div className="auth-card-form-input-container">
+        <InputSideIcon label="Email" mode="validityCheck" status={emailValidity}>
           <input
-            className="auth-card-form-email auth-card-form-input"
-            name="email"
+            className="auth-card-form-input"
+            id="auth-card-form-email"
             type="text"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             onFocus={() => setEmailTouched(true)}
           />
-          {type === "signup" && <ValidityIcon status={emailValidity} nextToInput />}
-        </div>
-        <label className="auth-card-form-label" htmlFor="password">
-          Password
-        </label>
-        <div className="auth-card-form-input-container">
+        </InputSideIcon>
+
+        <InputIconGroup
+          validityStatuses={[
+            { label: "8 Characters", status: passwordLength },
+            { label: "Uppercase", status: passwordUpper },
+            { label: "Number", status: passwordNumber },
+            { label: "Special Character", status: passwordSpecial }
+          ]}
+        >
+          <InputSideIcon label="Password" mode="visibilityToggle" toggleIcon={passwordVisible} onToggle={() => setPasswordVisible(!passwordVisible)}>
+            <input
+              className="auth-card-form-input"
+              id="auth-card-form-password"
+              type={passwordVisible ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onFocus={() => {
+                setPasswordTouched(true);
+              }}
+            />
+          </InputSideIcon>
+        </InputIconGroup>
+
+        <InputSideIcon label="Confirm Password" mode="validityCheck" status={passwordMatch}>
           <input
-            className="auth-card-form-password auth-card-form-input"
-            name="password"
+            className="auth-card-form-input"
+            id="auth-card-form-confirm-password"
             type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
             onFocus={() => {
-              setPasswordTouched(true);
+              setConfirmPasswordTouched(true);
             }}
           />
-        </div>
-        {type === "signup" && (
-          <>
-            <div className="auth-card-form-validity-icon-group">
-              <ValidityIcon status={passwordLength} label="8 Characters" />
-              <ValidityIcon status={passwordUpper} label="Uppercase" />
-              <ValidityIcon status={passwordNumber} label="Number" />
-              <ValidityIcon status={passwordSpecial} label="Special Character" />
-            </div>
-            <label className="auth-card-form-label" htmlFor="confirm-password">
-              Confirm Password
-            </label>
-            <div className="auth-card-form-input-container">
-              <input
-                className="auth-card-form-confirm-password auth-card-form-input"
-                name="confirm-password"
-                type="password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                onFocus={() => {
-                  setConfirmPasswordTouched(true);
-                }}
-              ></input>
-              <ValidityIcon status={passwordMatch} nextToInput />
-            </div>
-          </>
-        )}
+        </InputSideIcon>
 
         <SubmitButton label={authButtonLabel}></SubmitButton>
-        {errorMessage && <p className="auth-error-message">{errorMessage}</p>}
+        {errorMessage && <Toast message={errorMessage} type="error" onClose={() => setErrorMessage(null)} duration={5000} />}
       </form>
     </div>
   );

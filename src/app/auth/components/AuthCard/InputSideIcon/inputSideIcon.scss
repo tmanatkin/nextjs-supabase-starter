@@ -1,0 +1,23 @@
+.auth-card-form-input-side-icon {
+  width: 100%;
+
+  &-container {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    width: 100%;
+
+    .auth-card-form-icon {
+      padding: 0 0.5rem;
+      border: 1px solid $color-foreground-muted;
+      border-left: 0;
+      border-radius: 0 $border-radius-xs $border-radius-xs 0;
+      transform: translate(-2px);
+      z-index: 0;
+
+      svg {
+        transform: translate(1px);
+      }
+    }
+  }
+}

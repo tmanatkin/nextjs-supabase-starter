@@ -7,36 +7,24 @@
     color: $color-foreground-muted;
   }
 
-  &-svg {
+  svg {
     height: 1.25rem;
     width: 1.25rem;
 
-    &-valid {
+    &.valid-icon {
       stroke: $color-valid;
     }
 
-    &-warning {
+    &.warning-icon {
       stroke: $color-warning;
     }
 
-    &-error {
+    &.error-icon {
       stroke: $color-error;
     }
 
-    &-neutral {
+    &.neutral-icon {
       stroke: $color-foreground-muted;
-    }
-  }
-
-  &-next-to-input {
-    padding: 0 0.5rem;
-    border: 1px solid $color-foreground-muted;
-    border-left: 0;
-    border-radius: 0 2px 2px 0;
-    transform: translate(-2px);
-    z-index: 0;
-    svg {
-      transform: translate(1px);
     }
   }
 }
