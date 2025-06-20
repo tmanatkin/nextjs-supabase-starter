@@ -1,14 +1,15 @@
 "use client";
 
 import "./authCard.scss";
+import { login, signup } from "../../actions";
 import { ValidityStatus } from "@/types/ValidityStatus";
 import { useState, useEffect } from "react";
 import useDebounce from "../../../../hooks/useDebounce";
-import { supabase } from "../../../../lib/supabaseClient";
 import SubmitButton from "./SubmitButton/SubmitButton";
 import Toast from "../../../../components/Toast/Toast";
 import InputSideIcon from "./InputSideIcon/InputSideIcon";
 import InputIconGroup from "./InputIconGroup/InputIconGroup";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type AuthCardProps = {
@@ -16,6 +17,8 @@ type AuthCardProps = {
 };
 
 export default function AuthCard({ type }: AuthCardProps) {
+  const router = useRouter();
+
   const authButtonLabel = type === "login" ? "Log In" : "Sign Up";
   const authTitle = type === "login" ? "Welcome Back" : "Get Started";
 
@@ -137,15 +140,27 @@ export default function AuthCard({ type }: AuthCardProps) {
 
   // authenticate with supabase
   const authenticateSubmission = async () => {
+    const data = { email, password };
+    let result;
+
     // login
     if (type === "login") {
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) setErrorMessage(error.message);
+      result = await login(data);
     }
     // signup
     else {
-      const { error } = await supabase.auth.signUp({ email, password });
-      if (error) setErrorMessage(error.message);
+      result = await signup(data);
+    }
+
+    // error handling
+    if (result?.error) {
+      setErrorMessage(result.error);
+    }
+    // redirect user
+    else {
+      window.location.href = "/";
+      // router.push("/");
+      // router.refresh();
     }
   };
 
