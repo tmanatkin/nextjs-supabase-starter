@@ -9,7 +9,6 @@ import SubmitButton from "./SubmitButton/SubmitButton";
 import Toast from "../../../../components/Toast/Toast";
 import InputSideIcon from "./InputSideIcon/InputSideIcon";
 import InputIconGroup from "./InputIconGroup/InputIconGroup";
-import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 type AuthCardProps = {
@@ -17,8 +16,6 @@ type AuthCardProps = {
 };
 
 export default function AuthCard({ type }: AuthCardProps) {
-  const router = useRouter();
-
   const authButtonLabel = type === "login" ? "Log In" : "Sign Up";
   const authTitle = type === "login" ? "Welcome Back" : "Get Started";
 
