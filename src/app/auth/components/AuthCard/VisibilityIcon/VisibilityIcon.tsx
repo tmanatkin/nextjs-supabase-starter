@@ -10,7 +10,7 @@ type VisibilityIconProps = {
 export default function VisibilityIcon({ toggleIcon, onClick }: VisibilityIconProps) {
   return (
     <button className="auth-card-form-visibility-icon auth-card-form-icon" onClick={onClick} type="button">
-      {toggleIcon ? <HiddenIcon /> : <VisibleIcon />}
+      {toggleIcon ? <VisibleIcon /> : <HiddenIcon />}
     </button>
   );
 }

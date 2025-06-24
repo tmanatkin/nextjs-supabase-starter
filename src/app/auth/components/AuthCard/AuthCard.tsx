@@ -1,7 +1,7 @@
 "use client";
 
 import "./authCard.scss";
-import { login, signup } from "../../actions";
+import { isEmailRegistered, login, signup } from "../../actions";
 import { ValidityStatus } from "@/types/ValidityStatus";
 import { useState, useEffect } from "react";
 import useDebounce from "../../../../hooks/useDebounce";
@@ -95,34 +95,25 @@ export default function AuthCard({ authType }: AuthCardProps) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [debouncedPassword, debouncedConfirmPassword, confirmPasswordTouched]);
 
-  // check if any part of form is empty
-  const isFormEmpty = (): boolean => {
-    if (!email) {
-      setErrorMessage("Email is required");
-      return false;
-    } else if (!password) {
-      setErrorMessage("Password is required");
-      return false;
-    } else if (!confirmPassword && authType === "signup") {
-      setErrorMessage("Confirm Password is required");
-      return false;
-    }
-    return true;
-  };
-
   // handle form submission
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
 
-    // return early if form is empty
-    if (!isFormEmpty()) {
+    if (!email) {
+      setErrorMessage("Email is required");
       return;
-    }
-
-    // run all validations again, block submission if any fail
-    if (!validateEmail()) {
+    } else if (!validateEmail()) {
       setErrorMessage("Enter a valid email");
+      return;
+    } else if (await isEmailRegistered(email)) {
+      setErrorMessage("Email is already registered");
+      return;
+    } else if (!password) {
+      setErrorMessage("Password is required");
+      return;
+    } else if (!confirmPassword && authType === "signup") {
+      setErrorMessage("Confirm Password is required");
       return;
     } else if (!validatePassword()) {
       setErrorMessage("Enter a valid password");
