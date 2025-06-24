@@ -40,7 +40,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [errorMessage, setErrorMessage] = useState<React.ReactNode>(null);
 
   // validate email (x@x.x)
   const validateEmail = (): boolean => {
@@ -107,16 +107,22 @@ export default function AuthCard({ authType }: AuthCardProps) {
       setErrorMessage("Enter a valid email");
       return;
     } else if (await isEmailRegistered(email)) {
-      setErrorMessage("Email is already registered");
+      setErrorMessage(
+        <>
+          An account with this email already exists
+          <br />
+          <Link href="/auth/login">Log In</Link> instead?
+        </>
+      );
       return;
     } else if (!password) {
       setErrorMessage("Password is required");
       return;
-    } else if (!confirmPassword && authType === "signup") {
-      setErrorMessage("Confirm Password is required");
-      return;
     } else if (!validatePassword()) {
       setErrorMessage("Enter a valid password");
+      return;
+    } else if (!confirmPassword && authType === "signup") {
+      setErrorMessage("Confirm password is required");
       return;
     } else if (!validateConfirmPassword() && authType === "signup") {
       setErrorMessage("Passwords must match");

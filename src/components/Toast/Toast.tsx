@@ -3,7 +3,7 @@ import "./Toast.scss";
 import ErrorIcon from "@/icons/ui/ErrorIcon";
 
 type ToastProps = {
-  message: string;
+  message: React.ReactNode;
   type?: "error" | "success" | "warning";
   onClose: () => void;
   duration?: number;

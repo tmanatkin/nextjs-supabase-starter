@@ -16,15 +16,18 @@ export async function login(data: { email: string; password: string }): Promise<
   return { success: true };
 }
 
-//
+// check if email is registered to an existing user
 export async function isEmailRegistered(email: string): Promise<boolean> {
   const supabase = await createAdminClient();
-  const { data, error } = await supabase.auth.admin.listUsers();
+  const { data, error } = await supabase.rpc("check_user_exists_by_email", {
+    email_param: email.toLowerCase()
+  });
 
   if (error) throw error;
 
-  const user = data.users.find((u) => u.email === email.toLowerCase());
-  return !!user; // Return true if user exists, false otherwise
+  const userExists = data && data.length > 0 && data[0].user_exists;
+
+  return userExists;
 }
 
 // signup
