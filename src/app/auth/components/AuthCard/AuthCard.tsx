@@ -12,12 +12,12 @@ import InputIconGroup from "./InputIconGroup/InputIconGroup";
 import Link from "next/link";
 
 type AuthCardProps = {
-  type: "login" | "signup";
+  authType: "login" | "signup";
 };
 
-export default function AuthCard({ type }: AuthCardProps) {
-  const authButtonLabel = type === "login" ? "Log In" : "Sign Up";
-  const authTitle = type === "login" ? "Welcome Back" : "Get Started";
+export default function AuthCard({ authType }: AuthCardProps) {
+  const authButtonLabel = authType === "login" ? "Log In" : "Sign Up";
+  const authTitle = authType === "login" ? "Welcome Back" : "Get Started";
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -73,7 +73,7 @@ export default function AuthCard({ type }: AuthCardProps) {
 
   // debounce email validation for warnings
   useEffect(() => {
-    if (type === "signup" && emailTouched) {
+    if (authType === "signup" && emailTouched) {
       validateEmail();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,7 +81,7 @@ export default function AuthCard({ type }: AuthCardProps) {
 
   // debounce password validation for warnings
   useEffect(() => {
-    if (type === "signup" && passwordTouched) {
+    if (authType === "signup" && passwordTouched) {
       validatePassword();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,7 +89,7 @@ export default function AuthCard({ type }: AuthCardProps) {
 
   // debounce confirm password validation for warnings
   useEffect(() => {
-    if (type === "signup" && confirmPasswordTouched) {
+    if (authType === "signup" && confirmPasswordTouched) {
       validateConfirmPassword();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -103,7 +103,7 @@ export default function AuthCard({ type }: AuthCardProps) {
     } else if (!password) {
       setErrorMessage("Password is required");
       return false;
-    } else if (!confirmPassword && type === "signup") {
+    } else if (!confirmPassword && authType === "signup") {
       setErrorMessage("Confirm Password is required");
       return false;
     }
@@ -127,7 +127,7 @@ export default function AuthCard({ type }: AuthCardProps) {
     } else if (!validatePassword()) {
       setErrorMessage("Enter a valid password");
       return;
-    } else if (!validateConfirmPassword() && type === "signup") {
+    } else if (!validateConfirmPassword() && authType === "signup") {
       setErrorMessage("Passwords must match");
       return;
     }
@@ -141,7 +141,7 @@ export default function AuthCard({ type }: AuthCardProps) {
     let result;
 
     // login
-    if (type === "login") {
+    if (authType === "login") {
       result = await login(data);
     }
     // signup
@@ -156,8 +156,6 @@ export default function AuthCard({ type }: AuthCardProps) {
     // redirect user
     else {
       window.location.href = "/";
-      // router.push("/");
-      // router.refresh();
     }
   };
 
@@ -165,7 +163,7 @@ export default function AuthCard({ type }: AuthCardProps) {
     <div className="auth-card">
       <h2 className="auth-card-title">{authTitle}</h2>
       <form className="auth-card-form" onSubmit={handleSubmit}>
-        <InputSideIcon label="Email" hideIcon={type === "login"} mode="validityCheck" status={emailValidity}>
+        <InputSideIcon label="Email" hideIcon={authType === "login"} mode="validityCheck" status={emailValidity}>
           <input
             className="auth-card-form-input"
             id="auth-card-form-email"
@@ -177,7 +175,7 @@ export default function AuthCard({ type }: AuthCardProps) {
         </InputSideIcon>
 
         <InputIconGroup
-          hideIcons={type === "login"}
+          hideIcons={authType === "login"}
           validityStatuses={[
             { label: "8 Characters", status: passwordLength },
             { label: "Uppercase", status: passwordUpper },
@@ -198,7 +196,7 @@ export default function AuthCard({ type }: AuthCardProps) {
             />
           </InputSideIcon>
         </InputIconGroup>
-        {type === "signup" && (
+        {authType === "signup" && (
           <InputSideIcon label="Confirm Password" mode="validityCheck" status={passwordMatch}>
             <input
               className="auth-card-form-input"
@@ -214,7 +212,7 @@ export default function AuthCard({ type }: AuthCardProps) {
         )}
         <SubmitButton label={authButtonLabel}></SubmitButton>
         <p className="switch-auth-link">
-          {type === "login" ? (
+          {authType === "login" ? (
             <>
               {"Don't have an account? "}
               <Link href="/auth/signup">Sign Up</Link>
