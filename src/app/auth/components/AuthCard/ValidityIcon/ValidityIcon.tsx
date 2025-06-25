@@ -1,19 +1,19 @@
 import "./ValidityIcon.scss";
-import ValidIcon from "../../../../../icons/ui/ValidIcon";
+import SuccessIcon from "../../../../../icons/ui/SuccessIcon";
 import WarningIcon from "../../../../../icons/ui/WarningIcon";
 import ErrorIcon from "../../../../../icons/ui/ErrorIcon";
 import NeutralIcon from "../../../../../icons/ui/NeutralIcon";
-import { ValidityStatus } from "@/types/ValidityStatus";
+import { Status } from "@/types/Status";
 
 type ValidityIconProps = {
-  status: ValidityStatus;
+  status: Status;
   label?: string;
 };
 
 export default function ValidityIcon({ status, label }: ValidityIconProps) {
   return (
     <div className="auth-card-form-validity-icon auth-card-form-icon">
-      {status === "valid" && <ValidIcon />}
+      {status === "success" && <SuccessIcon />}
       {status === "warning" && <WarningIcon />}
       {status === "error" && <ErrorIcon />}
       {status === "neutral" && <NeutralIcon />}

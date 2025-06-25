@@ -1,4 +1,4 @@
-import { ValidityStatus } from "@/types/ValidityStatus";
+import { Status } from "@/types/Status";
 import ValidityIcon from "../ValidityIcon/ValidityIcon";
 import "./inputIconGroup.scss";
 
@@ -7,7 +7,7 @@ type InputIconGroupProps = {
   hideIcons?: boolean;
   validityStatuses: {
     label: string;
-    status: ValidityStatus;
+    status: Status;
   }[];
   children: React.ReactNode;
 };

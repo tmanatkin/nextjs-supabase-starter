@@ -1,4 +1,4 @@
-import { ValidityStatus } from "@/types/ValidityStatus";
+import { Status } from "@/types/Status";
 import ValidityIcon from "../ValidityIcon/ValidityIcon";
 import "./inputSideIcon.scss";
 import VisibilityIcon from "../VisibilityIcon/VisibilityIcon";
@@ -12,7 +12,7 @@ type BaseProps = {
 type InputSideIconProps =
   | (BaseProps & {
       mode: "validityCheck";
-      status: ValidityStatus;
+      status: Status;
     })
   | (BaseProps & {
       mode: "visibilityToggle";
