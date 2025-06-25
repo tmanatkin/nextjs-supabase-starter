@@ -2,7 +2,7 @@
 
 import "./authCard.scss";
 import { isEmailRegistered, login, signup } from "../../actions";
-import { ValidityStatus } from "@/types/ValidityStatus";
+import { Status } from "@/types/Status";
 import { useState, useEffect } from "react";
 import useDebounce from "../../../../hooks/useDebounce";
 import SubmitButton from "./SubmitButton/SubmitButton";
@@ -31,12 +31,12 @@ export default function AuthCard({ authType }: AuthCardProps) {
   const [passwordTouched, setPasswordTouched] = useState(false);
   const [confirmPasswordTouched, setConfirmPasswordTouched] = useState(false);
 
-  const [emailValidity, setEmailValidity] = useState<ValidityStatus>("neutral");
-  const [passwordUpper, setPasswordUpper] = useState<ValidityStatus>("neutral");
-  const [passwordNumber, setPasswordNumber] = useState<ValidityStatus>("neutral");
-  const [passwordSpecial, setPasswordSpecial] = useState<ValidityStatus>("neutral");
-  const [passwordLength, setPasswordLength] = useState<ValidityStatus>("neutral");
-  const [passwordMatch, setPasswordMatch] = useState<ValidityStatus>("neutral");
+  const [emailValidity, setEmailValidity] = useState<Status>("neutral");
+  const [passwordUpper, setPasswordUpper] = useState<Status>("neutral");
+  const [passwordNumber, setPasswordNumber] = useState<Status>("neutral");
+  const [passwordSpecial, setPasswordSpecial] = useState<Status>("neutral");
+  const [passwordLength, setPasswordLength] = useState<Status>("neutral");
+  const [passwordMatch, setPasswordMatch] = useState<Status>("neutral");
 
   const [passwordVisible, setPasswordVisible] = useState(false);
 
@@ -45,7 +45,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
   // validate email (x@x.x)
   const validateEmail = (): boolean => {
     const validEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-    setEmailValidity(validEmail ? "valid" : "warning");
+    setEmailValidity(validEmail ? "success" : "warning");
     return validEmail;
   };
 
@@ -57,17 +57,17 @@ export default function AuthCard({ authType }: AuthCardProps) {
     const requiredLength = 8;
     const lengthValid = password.length >= requiredLength;
 
-    setPasswordUpper(hasUpper ? "valid" : "warning");
-    setPasswordNumber(hasNumber ? "valid" : "warning");
-    setPasswordSpecial(hasSpecial ? "valid" : "warning");
-    setPasswordLength(lengthValid ? "valid" : "warning");
+    setPasswordUpper(hasUpper ? "success" : "warning");
+    setPasswordNumber(hasNumber ? "success" : "warning");
+    setPasswordSpecial(hasSpecial ? "success" : "warning");
+    setPasswordLength(lengthValid ? "success" : "warning");
     return hasUpper && hasNumber && hasSpecial && lengthValid;
   };
 
   // validate confirm password (match password)
   const validateConfirmPassword = (): boolean => {
     const validConfirmPassword = confirmPassword === password && confirmPassword !== "";
-    setPasswordMatch(validConfirmPassword ? "valid" : "warning");
+    setPasswordMatch(validConfirmPassword ? "success" : "warning");
     return validConfirmPassword;
   };
 
