@@ -30,6 +30,15 @@
       height: 2.5rem;
       font-size: 1rem;
     }
+
+    .auth-nav-link {
+      @include flex-center;
+      gap: 0.25rem;
+      width: 100%;
+      p {
+        text-align: center;
+      }
+    }
   }
 
   @include respond(sm) {

@@ -1,7 +1,7 @@
 "use client";
 
 import "./authCard.scss";
-import { isEmailRegistered, login, signup } from "../../actions";
+import { isEmailRegistered, login, signup, sendPasswordRecovery, changePassword } from "../../actions";
 import { Status } from "@/types/Status";
 import { useState, useEffect } from "react";
 import useDebounce from "../../../../hooks/useDebounce";
@@ -12,12 +12,30 @@ import InputIconGroup from "./InputIconGroup/InputIconGroup";
 import Link from "next/link";
 
 type AuthCardProps = {
-  authType: "login" | "signup";
+  authType: "login" | "signup" | "recover" | "change-password";
 };
 
 export default function AuthCard({ authType }: AuthCardProps) {
-  const authButtonLabel = authType === "login" ? "Log In" : "Sign Up";
-  const authTitle = authType === "login" ? "Welcome Back" : "Get Started";
+  const authTitle =
+    authType === "login"
+      ? "Welcome Back"
+      : authType === "signup"
+      ? "Get Started"
+      : authType === "recover"
+      ? "Recover Account"
+      : authType === "change-password"
+      ? "Change Password"
+      : null;
+  const authButtonLabel =
+    authType === "login"
+      ? "Log In"
+      : authType === "signup"
+      ? "Sign Up"
+      : authType === "recover"
+      ? "Recover Account"
+      : authType === "change-password"
+      ? "Change Password"
+      : null;
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -40,7 +58,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
   const [passwordVisible, setPasswordVisible] = useState(false);
 
-  const [errorMessage, setErrorMessage] = useState<React.ReactNode>(null);
+  const [message, setMessage] = useState<{ message: React.ReactNode; type: Status } | null>(null);
 
   // validate email (x@x.x)
   const validateEmail = (): boolean => {
@@ -73,7 +91,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
   // debounce email validation for warnings
   useEffect(() => {
-    if (authType === "signup" && emailTouched) {
+    if ((authType === "signup" || authType === "recover") && emailTouched) {
       validateEmail();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -81,7 +99,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
   // debounce password validation for warnings
   useEffect(() => {
-    if (authType === "signup" && passwordTouched) {
+    if ((authType === "signup" || authType === "change-password") && passwordTouched) {
       validatePassword();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -89,7 +107,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
   // debounce confirm password validation for warnings
   useEffect(() => {
-    if (authType === "signup" && confirmPasswordTouched) {
+    if ((authType === "signup" || authType === "change-password") && confirmPasswordTouched) {
       validateConfirmPassword();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -98,35 +116,60 @@ export default function AuthCard({ authType }: AuthCardProps) {
   // handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setErrorMessage(null);
+    setMessage(null);
 
-    if (!email) {
-      setErrorMessage("Email is required");
-      return;
-    } else if (!validateEmail()) {
-      setErrorMessage("Enter a valid email");
-      return;
-    } else if (await isEmailRegistered(email)) {
-      setErrorMessage(
-        <>
-          An account with this email already exists
-          <br />
-          <Link href="/auth/login">Log In</Link> instead?
-        </>
-      );
-      return;
-    } else if (!password) {
-      setErrorMessage("Password is required");
-      return;
-    } else if (!validatePassword()) {
-      setErrorMessage("Enter a valid password");
-      return;
-    } else if (!confirmPassword && authType === "signup") {
-      setErrorMessage("Confirm password is required");
-      return;
-    } else if (!validateConfirmPassword() && authType === "signup") {
-      setErrorMessage("Passwords must match");
-      return;
+    // email
+    // login, signup, and recover
+    if (authType === "login" || authType === "signup" || authType === "recover") {
+      if (!email) {
+        setMessage({ message: "Email is required", type: "error" });
+        return;
+      } else if (!validateEmail()) {
+        setMessage({ message: "Enter a valid email", type: "error" });
+        return;
+      }
+    }
+
+    // check if email is already registered
+    // signup
+    if (authType === "signup") {
+      if (await isEmailRegistered(email)) {
+        setMessage({
+          message: (
+            <>
+              An account with this email already exists
+              <br />
+              <Link href="/auth/login">Log In</Link> instead?
+            </>
+          ),
+          type: "error"
+        });
+        return;
+      }
+    }
+
+    // password
+    // login, signup, and change-password
+    if (authType === "signup" || authType === "login" || authType === "change-password") {
+      if (!password) {
+        setMessage({ message: "Password is required", type: "error" });
+        return;
+      } else if (!validatePassword()) {
+        setMessage({ message: "Enter a valid password", type: "error" });
+        return;
+      }
+    }
+
+    // confirm password
+    // signup and change-password
+    if (authType === "signup" || authType === "change-password") {
+      if (!confirmPassword) {
+        setMessage({ message: "Confirm password is required", type: "error" });
+        return;
+      } else if (!validateConfirmPassword()) {
+        setMessage({ message: "Passwords must match", type: "error" });
+        return;
+      }
     }
 
     authenticateSubmission();
@@ -134,25 +177,40 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
   // authenticate with supabase
   const authenticateSubmission = async () => {
-    const data = { email, password };
     let result;
 
     // login
     if (authType === "login") {
-      result = await login(data);
+      result = await login({ email, password });
     }
     // signup
-    else {
-      result = await signup(data);
+    else if (authType === "signup") {
+      result = await signup({ email, password });
+    }
+    // recover
+    else if (authType === "recover") {
+      result = await sendPasswordRecovery(email);
+    }
+    // change password
+    else if (authType === "change-password") {
+      result = await changePassword(password);
     }
 
     // error handling
     if (result?.error) {
-      setErrorMessage(result.error);
+      setMessage({ message: result.error, type: "error" });
     }
-    // redirect user
-    else {
+    // redirect user to home page for login, signup, and change password
+    else if (authType === "login" || authType === "signup" || authType === "change-password") {
       window.location.href = "/";
+    }
+    // notify user that recovery email was sent
+    else if (authType === "recover") {
+      setMessage({ message: "Recovery email sent", type: "success" });
+    }
+    // catch if unexpected authType (should never happen)
+    else {
+      setMessage({ message: "Unexpected error occurred", type: "error" });
     }
   };
 
@@ -160,41 +218,58 @@ export default function AuthCard({ authType }: AuthCardProps) {
     <div className="auth-card">
       <h2 className="auth-card-title">{authTitle}</h2>
       <form className="auth-card-form" onSubmit={handleSubmit}>
-        <InputSideIcon label="Email" hideIcon={authType === "login"} mode="validityCheck" status={emailValidity}>
-          <input
-            className="auth-card-form-input"
-            id="auth-card-form-email"
-            type="text"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            onFocus={() => setEmailTouched(true)}
-          />
-        </InputSideIcon>
-
-        <InputIconGroup
-          hideIcons={authType === "login"}
-          validityStatuses={[
-            { label: "8 Characters", status: passwordLength },
-            { label: "Uppercase", status: passwordUpper },
-            { label: "Number", status: passwordNumber },
-            { label: "Special Character", status: passwordSpecial }
-          ]}
-        >
-          <InputSideIcon label="Password" mode="visibilityToggle" toggleIcon={passwordVisible} onToggle={() => setPasswordVisible(!passwordVisible)}>
+        {/* email */}
+        {(authType === "login" || authType === "signup" || authType === "recover") && (
+          <InputSideIcon label="Email" hideIcon={authType === "login"} mode="validityCheck" status={emailValidity}>
             <input
               className="auth-card-form-input"
-              id="auth-card-form-password"
-              type={passwordVisible ? "text" : "password"}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              onFocus={() => {
-                setPasswordTouched(true);
-              }}
+              id="auth-card-form-email"
+              type="text"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              onFocus={() => setEmailTouched(true)}
             />
           </InputSideIcon>
-        </InputIconGroup>
-        {authType === "signup" && (
-          <InputSideIcon label="Confirm Password" mode="validityCheck" status={passwordMatch}>
+        )}
+
+        {/* password */}
+        {(authType === "login" || authType === "signup" || authType === "change-password") && (
+          <InputIconGroup
+            hideIcons={authType === "login"}
+            validityStatuses={[
+              { label: "8 Characters", status: passwordLength },
+              { label: "Uppercase", status: passwordUpper },
+              { label: "Number", status: passwordNumber },
+              { label: "Special Character", status: passwordSpecial }
+            ]}
+          >
+            <InputSideIcon
+              label={authType === "change-password" ? "New Password" : "Password"}
+              mode="visibilityToggle"
+              toggleIcon={passwordVisible}
+              onToggle={() => setPasswordVisible(!passwordVisible)}
+            >
+              <input
+                className="auth-card-form-input"
+                id="auth-card-form-password"
+                type={passwordVisible ? "text" : "password"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                onFocus={() => {
+                  setPasswordTouched(true);
+                }}
+              />
+            </InputSideIcon>
+          </InputIconGroup>
+        )}
+
+        {/* confirm password */}
+        {(authType === "signup" || authType === "change-password") && (
+          <InputSideIcon
+            label={authType === "change-password" ? "Confirm New Password" : "Confirm Password"}
+            mode="validityCheck"
+            status={passwordMatch}
+          >
             <input
               className="auth-card-form-input"
               id="auth-card-form-confirm-password"
@@ -207,21 +282,42 @@ export default function AuthCard({ authType }: AuthCardProps) {
             />
           </InputSideIcon>
         )}
-        <SubmitButton label={authButtonLabel}></SubmitButton>
-        <p className="switch-auth-link">
+
+        {/* submit button */}
+        <SubmitButton label={authButtonLabel ?? ""}></SubmitButton>
+
+        {/* auth navigation link */}
+        <div className="auth-nav-link">
           {authType === "login" ? (
             <>
-              {"Don't have an account? "}
-              <Link href="/auth/signup">Sign Up</Link>
+              <p>
+                {"Don't have an account? "}
+                <Link href="/auth/signup">Sign Up</Link>
+              </p>
+              <p>
+                <Link href="/auth/recover">Forgot Password?</Link>
+              </p>
             </>
-          ) : (
-            <>
+          ) : authType === "signup" ? (
+            <p>
               {"Already have an account? "}
               <Link href="/auth/login">Log In</Link>
-            </>
-          )}
-        </p>
-        {errorMessage && <Toast message={errorMessage} type="error" onClose={() => setErrorMessage(null)} duration={5000} />}
+            </p>
+          ) : authType === "recover" ? (
+            <p>
+              {"recover"}
+              <Link href="/auth/login">Log In</Link>
+            </p>
+          ) : authType === "change-password" ? (
+            <p>
+              {"change-password"}
+              <Link href="/auth/login">Log In</Link>
+            </p>
+          ) : null}
+        </div>
+
+        {/* error message */}
+        {message && <Toast message={message.message} type={message.type} onClose={() => setMessage(null)} duration={5000} />}
       </form>
     </div>
   );

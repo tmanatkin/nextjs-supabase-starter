@@ -9,14 +9,14 @@ export async function login(data: { email: string; password: string }): Promise<
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
-    return { error: error.message };
+    return { error: (error as Error).message };
   }
 
   revalidatePath("/", "layout");
   return { success: true };
 }
 
-// check if email is registered to an existing user
+// is email registered to an existing user
 export async function isEmailRegistered(email: string): Promise<boolean> {
   const supabase = await createAdminClient();
   const { data, error } = await supabase.rpc("check_user_exists_by_email", {
@@ -36,9 +36,36 @@ export async function signup(data: { email: string; password: string }): Promise
   const { error } = await supabase.auth.signUp(data);
 
   if (error) {
-    return { error: error.message };
+    return { error: (error as Error).message };
   }
 
   revalidatePath("/", "layout");
+  return { success: true };
+}
+
+// send password recovery email
+export async function sendPasswordRecovery(email: string): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClientWithCookies();
+  const { error } = await supabase.auth.resetPasswordForEmail(email, {
+    redirectTo: `/auth/change-password`
+  });
+
+  if (error) {
+    return { error: (error as Error).message };
+  }
+
+  return { success: true };
+}
+
+export async function changePassword(newPassword: string): Promise<{ error?: string; success?: boolean }> {
+  const supabase = await createClientWithCookies();
+  const { error } = await supabase.auth.updateUser({
+    password: newPassword
+  });
+
+  if (error) {
+    return { error: (error as Error).message };
+  }
+
   return { success: true };
 }
