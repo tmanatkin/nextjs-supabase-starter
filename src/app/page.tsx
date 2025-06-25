@@ -3,9 +3,16 @@
 import { logout } from "./auth/actions";
 
 export default function RootPage() {
+  const handleLogout = async () => {
+    const result = await logout();
+    if (result?.success) {
+      window.location.href = "/";
+    }
+  };
+
   return (
     <div>
-      <button onClick={() => logout()}>logout</button>
+      <button onClick={handleLogout}>logout</button>
     </div>
   );
 }
