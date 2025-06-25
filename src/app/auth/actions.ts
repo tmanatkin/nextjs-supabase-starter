@@ -69,3 +69,16 @@ export async function changePassword(newPassword: string): Promise<{ error?: str
 
   return { success: true };
 }
+
+// logout
+export async function logout() {
+  const supabase = await createClientWithCookies();
+  const { error } = await supabase.auth.signOut();
+
+  if (error) {
+    return { error: (error as Error).message };
+  }
+
+  revalidatePath("/", "layout");
+  return { success: true };
+}
