@@ -1,20 +1,19 @@
-import { createServerClient } from "@supabase/ssr";
+import { createServerClient as serverClient } from "@supabase/ssr";
 import { cookies } from "next/headers";
-
 import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
 const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 const supabaseServiceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-export function createAdminClient() {
+export function createServersideAdminClient() {
   return createClient(supabaseUrl!, supabaseServiceRoleKey!);
 }
 
-export async function createClientWithCookies() {
+export async function createServersideClient() {
   const cookieStore = await cookies();
 
-  return createServerClient(supabaseUrl!, supabaseAnonKey!, {
+  return serverClient(supabaseUrl!, supabaseAnonKey!, {
     cookies: {
       getAll() {
         return cookieStore.getAll();

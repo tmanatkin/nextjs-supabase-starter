@@ -1,11 +1,11 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
-import { createClientWithCookies, createAdminClient } from "@/utils/supabase/server";
+import { createServersideClient, createServersideAdminClient } from "@/utils/supabase/server";
 
 // login
 export async function login(data: { email: string; password: string }): Promise<{ error?: string; success?: boolean }> {
-  const supabase = await createClientWithCookies();
+  const supabase = await createServersideClient();
   const { error } = await supabase.auth.signInWithPassword(data);
 
   if (error) {
@@ -18,7 +18,7 @@ export async function login(data: { email: string; password: string }): Promise<
 
 // is email registered to an existing user
 export async function isEmailRegistered(email: string): Promise<boolean> {
-  const supabase = await createAdminClient();
+  const supabase = await createServersideAdminClient();
   const { data, error } = await supabase.rpc("check_user_exists_by_email", {
     email_param: email.toLowerCase()
   });
@@ -32,7 +32,7 @@ export async function isEmailRegistered(email: string): Promise<boolean> {
 
 // signup
 export async function signup(data: { email: string; password: string }): Promise<{ error?: string; success?: boolean }> {
-  const supabase = await createClientWithCookies();
+  const supabase = await createServersideClient();
   const { error } = await supabase.auth.signUp(data);
 
   if (error) {
@@ -45,7 +45,7 @@ export async function signup(data: { email: string; password: string }): Promise
 
 // send password recovery email
 export async function sendPasswordRecovery(email: string): Promise<{ error?: string; success?: boolean }> {
-  const supabase = await createClientWithCookies();
+  const supabase = await createServersideClient();
   const { error } = await supabase.auth.resetPasswordForEmail(email, {
     redirectTo: `${process.env.NEXT_PUBLIC_URL}/auth/change-password`
   });
@@ -59,7 +59,7 @@ export async function sendPasswordRecovery(email: string): Promise<{ error?: str
 
 // change password
 export async function changePassword(newPassword: string): Promise<{ error?: string; success?: boolean }> {
-  const supabase = await createClientWithCookies();
+  const supabase = await createServersideClient();
   const { error } = await supabase.auth.updateUser({
     password: newPassword
   });
@@ -73,7 +73,7 @@ export async function changePassword(newPassword: string): Promise<{ error?: str
 
 // logout
 export async function logout() {
-  const supabase = await createClientWithCookies();
+  const supabase = await createServersideClient();
   const { error } = await supabase.auth.signOut();
 
   if (error) {
