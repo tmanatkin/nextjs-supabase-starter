@@ -22,7 +22,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
       : authType === "signup"
       ? "Get Started"
       : authType === "recover"
-      ? "Recover Account"
+      ? "Forgot Password?"
       : authType === "change-password"
       ? "Change Password"
       : null;
@@ -305,15 +305,10 @@ export default function AuthCard({ authType }: AuthCardProps) {
             </p>
           ) : authType === "recover" ? (
             <p>
-              {"recover"}
+              {"Remember your password? "}
               <Link href="/auth/login">Log In</Link>
             </p>
-          ) : authType === "change-password" ? (
-            <p>
-              {"change-password"}
-              <Link href="/auth/login">Log In</Link>
-            </p>
-          ) : null}
+          ) : authType === "change-password" ? null : null}
         </div>
 
         {/* error message */}
