@@ -31,10 +31,20 @@ export async function updateSession(request: NextRequest) {
     data: { user }
   } = await supabase.auth.getUser();
 
+  // non authenticated can only access /auth
+  // -- the exeption to this is the initial loading of /auth/change-password
+  // -- non authenticated users CAN access this page, but will be instantly redirected if the client cannot authenticate
+  // -- the client authenticates by using the url query param "code" from the password recovery email link
   if (!user && !request.nextUrl.pathname.startsWith("/auth")) {
-    // no user, potentially respond by redirecting the user to the login page
     const url = request.nextUrl.clone();
     url.pathname = "/auth";
+    return NextResponse.redirect(url);
+  }
+
+  // authenticated users cannot access /auth except for /auth/change-password
+  if (user && request.nextUrl.pathname.startsWith("/auth") && request.nextUrl.pathname !== "/auth/change-password") {
+    const url = request.nextUrl.clone();
+    url.pathname = "/";
     return NextResponse.redirect(url);
   }
 

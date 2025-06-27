@@ -10,6 +10,7 @@ import Toast from "../../../../components/Toast/Toast";
 import InputSideIcon from "./InputSideIcon/InputSideIcon";
 import InputIconGroup from "./InputIconGroup/InputIconGroup";
 import Link from "next/link";
+import { createClientsideClient } from "@/utils/supabase/client";
 
 type AuthCardProps = {
   authType: "login" | "signup" | "recover" | "change-password";
@@ -59,6 +60,32 @@ export default function AuthCard({ authType }: AuthCardProps) {
   const [passwordVisible, setPasswordVisible] = useState(false);
 
   const [message, setMessage] = useState<{ message: React.ReactNode; type: Status } | null>(null);
+
+  const [isLoading, setIsLoading] = useState(true);
+
+  // authenticate user client-side before allowing them to changing password
+  // -- needs to be done to authenticate using url query param "code" from the password recovery email link
+  useEffect(() => {
+    async function changePasswordClientsideAuth() {
+      // only need supabase clientside client if changing password
+      if (authType === "change-password") {
+        const supabase = createClientsideClient();
+        const { error } = await supabase.auth.getUser();
+
+        // if not authenticated, redirect to login
+        if (error) {
+          window.location.href = "/auth/login";
+          return;
+        }
+      }
+
+      // if authenticated, show page as normal
+      setIsLoading(false);
+    }
+
+    changePasswordClientsideAuth();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // validate email (x@x.x)
   const validateEmail = (): boolean => {
@@ -213,6 +240,11 @@ export default function AuthCard({ authType }: AuthCardProps) {
       setMessage({ message: "Unexpected error occurred", type: "error" });
     }
   };
+
+  // show nothing when in loading state
+  if (isLoading) {
+    return <></>;
+  }
 
   return (
     <div className="auth-card">
