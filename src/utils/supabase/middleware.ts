@@ -31,11 +31,11 @@ export async function updateSession(request: NextRequest) {
     data: { user }
   } = await supabase.auth.getUser();
 
-  // non authenticated can only access /auth
+  // non authenticated can only access /auth or /info/[slug]
   // -- the exeption to this is the initial loading of /auth/update-password
   // -- non authenticated users CAN access this page, but will be instantly redirected if the client cannot authenticate
   // -- the client authenticates by using the url query param "code" from the password recovery email link
-  if (!user && !request.nextUrl.pathname.startsWith("/auth")) {
+  if (!user && !(request.nextUrl.pathname.startsWith("/auth") || request.nextUrl.pathname.startsWith("/info"))) {
     const url = request.nextUrl.clone();
     url.pathname = "/auth";
     return NextResponse.redirect(url);
