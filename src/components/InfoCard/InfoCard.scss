@@ -1,0 +1,7 @@
+.info-card {
+  @include flex-center();
+
+  &-link {
+    margin: 0.5rem 0 0 0;
+  }
+}

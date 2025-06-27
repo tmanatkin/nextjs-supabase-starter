@@ -163,13 +163,33 @@ export default function AuthCard({ authType }: AuthCardProps) {
     // check if email is already registered
     // signup
     if (authType === "signup") {
-      if (await isEmailRegistered(email)) {
+      const userExists = await isEmailRegistered(email);
+      if (userExists) {
         setMessage({
           message: (
             <>
               An account with this email already exists
               <br />
               <Link href="/auth/login">Log In</Link> instead?
+            </>
+          ),
+          type: "error"
+        });
+        return;
+      }
+    }
+
+    // check if email is not registered
+    // account-recovery
+    if (authType === "account-recovery") {
+      const userExists = await isEmailRegistered(email);
+      if (!userExists) {
+        setMessage({
+          message: (
+            <>
+              No account with this email exists
+              <br />
+              <Link href="/auth/signup">Sign Up</Link> instead?
             </>
           ),
           type: "error"
@@ -230,9 +250,13 @@ export default function AuthCard({ authType }: AuthCardProps) {
     if (result?.error) {
       setMessage({ message: result.error, type: "error" });
     }
-    // redirect user to home page for login, signup, and update-assword
-    else if (authType === "login" || authType === "signup" || authType === "update-password") {
-      window.location.href = "/";
+    // redirect user to home page for login, and update-assword
+    else if (authType === "login" || authType === "update-password") {
+      window.location.href = "/"; // full page reload
+    }
+    // redirect to email validate page for signup
+    else if (authType === "signup") {
+      router.push("/info/verify-email");
     }
     // notify user that recovery email was sent
     else if (authType === "account-recovery") {
