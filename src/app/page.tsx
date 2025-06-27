@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { logout } from "./auth/actions";
 
 export default function RootPage() {
@@ -13,6 +14,7 @@ export default function RootPage() {
   return (
     <div>
       <button onClick={handleLogout}>logout</button>
+      <Link href="/auth/update-password">update password</Link>
     </div>
   );
 }

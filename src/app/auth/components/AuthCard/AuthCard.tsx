@@ -1,7 +1,7 @@
 "use client";
 
 import "./authCard.scss";
-import { isEmailRegistered, login, signup, sendPasswordRecovery, changePassword } from "../../actions";
+import { isEmailRegistered, login, signup, sendPasswordRecovery, updatePassword } from "../../actions";
 import { Status } from "@/types/Status";
 import { useState, useEffect } from "react";
 import useDebounce from "../../../../hooks/useDebounce";
@@ -13,7 +13,7 @@ import Link from "next/link";
 import { createClientsideClient } from "@/utils/supabase/client";
 
 type AuthCardProps = {
-  authType: "login" | "signup" | "recover" | "change-password";
+  authType: "login" | "signup" | "account-recovery" | "update-password";
 };
 
 export default function AuthCard({ authType }: AuthCardProps) {
@@ -22,20 +22,20 @@ export default function AuthCard({ authType }: AuthCardProps) {
       ? "Welcome Back"
       : authType === "signup"
       ? "Get Started"
-      : authType === "recover"
+      : authType === "account-recovery"
       ? "Forgot Password?"
-      : authType === "change-password"
-      ? "Change Password"
+      : authType === "update-password"
+      ? "Secure Your Account"
       : null;
   const authButtonLabel =
     authType === "login"
       ? "Log In"
       : authType === "signup"
       ? "Sign Up"
-      : authType === "recover"
+      : authType === "account-recovery"
       ? "Recover Account"
-      : authType === "change-password"
-      ? "Change Password"
+      : authType === "update-password"
+      ? "Update Password"
       : null;
 
   const [email, setEmail] = useState("");
@@ -66,9 +66,9 @@ export default function AuthCard({ authType }: AuthCardProps) {
   // authenticate user client-side before allowing them to changing password
   // -- needs to be done to authenticate using url query param "code" from the password recovery email link
   useEffect(() => {
-    async function changePasswordClientsideAuth() {
+    async function updatePasswordClientsideAuth() {
       // only need supabase clientside client if changing password
-      if (authType === "change-password") {
+      if (authType === "update-password") {
         const supabase = createClientsideClient();
         const { error } = await supabase.auth.getUser();
 
@@ -83,7 +83,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
       setIsLoading(false);
     }
 
-    changePasswordClientsideAuth();
+    updatePasswordClientsideAuth();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -118,7 +118,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
   // debounce email validation for warnings
   useEffect(() => {
-    if ((authType === "signup" || authType === "recover") && emailTouched) {
+    if ((authType === "signup" || authType === "account-recovery") && emailTouched) {
       validateEmail();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -126,7 +126,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
   // debounce password validation for warnings
   useEffect(() => {
-    if ((authType === "signup" || authType === "change-password") && passwordTouched) {
+    if ((authType === "signup" || authType === "update-password") && passwordTouched) {
       validatePassword();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -134,7 +134,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
   // debounce confirm password validation for warnings
   useEffect(() => {
-    if ((authType === "signup" || authType === "change-password") && confirmPasswordTouched) {
+    if ((authType === "signup" || authType === "update-password") && confirmPasswordTouched) {
       validateConfirmPassword();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -146,8 +146,8 @@ export default function AuthCard({ authType }: AuthCardProps) {
     setMessage(null);
 
     // email
-    // login, signup, and recover
-    if (authType === "login" || authType === "signup" || authType === "recover") {
+    // login, signup, and account-recovery
+    if (authType === "login" || authType === "signup" || authType === "account-recovery") {
       if (!email) {
         setMessage({ message: "Email is required", type: "error" });
         return;
@@ -176,8 +176,8 @@ export default function AuthCard({ authType }: AuthCardProps) {
     }
 
     // password
-    // login, signup, and change-password
-    if (authType === "signup" || authType === "login" || authType === "change-password") {
+    // login, signup, and update-password
+    if (authType === "signup" || authType === "login" || authType === "update-password") {
       if (!password) {
         setMessage({ message: "Password is required", type: "error" });
         return;
@@ -188,8 +188,8 @@ export default function AuthCard({ authType }: AuthCardProps) {
     }
 
     // confirm password
-    // signup and change-password
-    if (authType === "signup" || authType === "change-password") {
+    // signup and update-password
+    if (authType === "signup" || authType === "update-password") {
       if (!confirmPassword) {
         setMessage({ message: "Confirm password is required", type: "error" });
         return;
@@ -214,25 +214,25 @@ export default function AuthCard({ authType }: AuthCardProps) {
     else if (authType === "signup") {
       result = await signup({ email, password });
     }
-    // recover
-    else if (authType === "recover") {
+    // account-recovery
+    else if (authType === "account-recovery") {
       result = await sendPasswordRecovery(email);
     }
-    // change password
-    else if (authType === "change-password") {
-      result = await changePassword(password);
+    // update-password
+    else if (authType === "update-password") {
+      result = await updatePassword(password);
     }
 
     // error handling
     if (result?.error) {
       setMessage({ message: result.error, type: "error" });
     }
-    // redirect user to home page for login, signup, and change password
-    else if (authType === "login" || authType === "signup" || authType === "change-password") {
+    // redirect user to home page for login, signup, and update-assword
+    else if (authType === "login" || authType === "signup" || authType === "update-password") {
       window.location.href = "/";
     }
     // notify user that recovery email was sent
-    else if (authType === "recover") {
+    else if (authType === "account-recovery") {
       setMessage({ message: "Recovery email sent", type: "success" });
     }
     // catch if unexpected authType (should never happen)
@@ -251,7 +251,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
       <h2 className="auth-card-title">{authTitle}</h2>
       <form className="auth-card-form" onSubmit={handleSubmit}>
         {/* email */}
-        {(authType === "login" || authType === "signup" || authType === "recover") && (
+        {(authType === "login" || authType === "signup" || authType === "account-recovery") && (
           <InputSideIcon label="Email" hideIcon={authType === "login"} mode="validityCheck" status={emailValidity}>
             <input
               className="auth-card-form-input"
@@ -265,7 +265,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
         )}
 
         {/* password */}
-        {(authType === "login" || authType === "signup" || authType === "change-password") && (
+        {(authType === "login" || authType === "signup" || authType === "update-password") && (
           <InputIconGroup
             hideIcons={authType === "login"}
             validityStatuses={[
@@ -276,7 +276,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
             ]}
           >
             <InputSideIcon
-              label={authType === "change-password" ? "New Password" : "Password"}
+              label={authType === "update-password" ? "New Password" : "Password"}
               mode="visibilityToggle"
               toggleIcon={passwordVisible}
               onToggle={() => setPasswordVisible(!passwordVisible)}
@@ -296,9 +296,9 @@ export default function AuthCard({ authType }: AuthCardProps) {
         )}
 
         {/* confirm password */}
-        {(authType === "signup" || authType === "change-password") && (
+        {(authType === "signup" || authType === "update-password") && (
           <InputSideIcon
-            label={authType === "change-password" ? "Confirm New Password" : "Confirm Password"}
+            label={authType === "update-password" ? "Confirm New Password" : "Confirm Password"}
             mode="validityCheck"
             status={passwordMatch}
           >
@@ -327,7 +327,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
                 <Link href="/auth/signup">Sign Up</Link>
               </p>
               <p>
-                <Link href="/auth/recover">Forgot Password?</Link>
+                <Link href="/auth/account-recovery">Forgot Password?</Link>
               </p>
             </>
           ) : authType === "signup" ? (
@@ -335,12 +335,12 @@ export default function AuthCard({ authType }: AuthCardProps) {
               {"Already have an account? "}
               <Link href="/auth/login">Log In</Link>
             </p>
-          ) : authType === "recover" ? (
+          ) : authType === "account-recovery" ? (
             <p>
               {"Remember your password? "}
               <Link href="/auth/login">Log In</Link>
             </p>
-          ) : authType === "change-password" ? null : null}
+          ) : authType === "update-password" ? null : null}
         </div>
 
         {/* error message */}
