@@ -11,12 +11,15 @@ import InputSideIcon from "./InputSideIcon/InputSideIcon";
 import InputIconGroup from "./InputIconGroup/InputIconGroup";
 import Link from "next/link";
 import { createClientsideClient } from "@/utils/supabase/client";
+import { useRouter } from "next/navigation";
 
 type AuthCardProps = {
   authType: "login" | "signup" | "account-recovery" | "update-password";
 };
 
 export default function AuthCard({ authType }: AuthCardProps) {
+  const router = useRouter();
+
   const authTitle =
     authType === "login"
       ? "Welcome Back"
@@ -74,7 +77,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
         // if not authenticated, redirect to login
         if (error) {
-          window.location.href = "/auth/login";
+          router.push("/auth/login");
           return;
         }
       }

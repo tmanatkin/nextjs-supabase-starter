@@ -2,12 +2,14 @@
 
 import Link from "next/link";
 import { logout } from "./auth/actions";
+import { useRouter } from "next/navigation";
 
 export default function RootPage() {
+  const router = useRouter();
   const handleLogout = async () => {
     const result = await logout();
     if (result?.success) {
-      window.location.href = "/";
+      router.push("/auth/login");
     }
   };
 
