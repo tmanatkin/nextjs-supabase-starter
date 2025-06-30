@@ -74,10 +74,9 @@ export default function AuthCard({ authType }: AuthCardProps) {
       if (authType === "update-password") {
         const supabase = createClientsideClient();
         const { error } = await supabase.auth.getUser();
-
-        // if not authenticated, redirect to login
+        // if not authenticated, redirect to error page
         if (error) {
-          router.push("/auth/login");
+          router.push("/info/update-password-auth-missing");
           return;
         }
       }

@@ -1,1 +1,1 @@
-export type InfoCardContent = { title: string; message?: string; link?: { label: string; href: string } };
+export type InfoCardContent = { title: string; message?: string; links?: { label: string; href: string }[] };
