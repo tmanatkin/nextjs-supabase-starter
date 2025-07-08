@@ -15,7 +15,9 @@ export default function RootPage() {
 
   return (
     <div>
-      <button onClick={handleLogout}>logout</button>
+      <button className="button-link" onClick={handleLogout}>
+        logout
+      </button>
       <Link href="/auth/update-password">update password</Link>
     </div>
   );

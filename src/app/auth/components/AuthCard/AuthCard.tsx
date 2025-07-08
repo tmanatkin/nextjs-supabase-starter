@@ -11,7 +11,7 @@ import InputSideIcon from "./InputSideIcon/InputSideIcon";
 import InputIconGroup from "./InputIconGroup/InputIconGroup";
 import Link from "next/link";
 import { createClientsideClient } from "@/utils/supabase/client";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 
 type AuthCardProps = {
   authType: "login" | "signup" | "account-recovery" | "update-password";
@@ -19,6 +19,8 @@ type AuthCardProps = {
 
 export default function AuthCard({ authType }: AuthCardProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const paramEmail = searchParams.get("email") ?? "";
 
   const authTitle =
     authType === "login"
@@ -41,7 +43,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
       ? "Update Password"
       : null;
 
-  const [email, setEmail] = useState("");
+  const [email, setEmail] = useState(authType === "account-recovery" ? paramEmail : "");
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
 
@@ -117,6 +119,14 @@ export default function AuthCard({ authType }: AuthCardProps) {
     setPasswordMatch(validConfirmPassword ? "success" : "warning");
     return validConfirmPassword;
   };
+
+  // validate email on inital load for account-recovery when using email query param
+  useEffect(() => {
+    if (authType === "account-recovery" && paramEmail !== "") {
+      validateEmail();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // debounce email validation for warnings
   useEffect(() => {
@@ -353,7 +363,12 @@ export default function AuthCard({ authType }: AuthCardProps) {
                 <Link href="/auth/signup">Sign Up</Link>
               </p>
               <p>
-                <Link href="/auth/account-recovery">Forgot Password?</Link>
+                <button
+                  className="button-link"
+                  onClick={() => router.push(`/auth/account-recovery${email ? `?email=${encodeURIComponent(email)}` : ""}`)}
+                >
+                  Forgot Password?
+                </button>
               </p>
             </>
           ) : authType === "signup" ? (

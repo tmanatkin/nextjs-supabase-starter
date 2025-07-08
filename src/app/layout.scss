@@ -15,4 +15,18 @@ body {
       color: $color-foreground-muted;
     }
   }
+
+  .button-link {
+    color: $color-foreground;
+    background-color: transparent;
+    border: none;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 0;
+    transition: color 0.2s;
+
+    &:hover {
+      color: $color-foreground-muted;
+    }
+  }
 }
