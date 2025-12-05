@@ -26,7 +26,7 @@ export async function createServersideClient() {
           // This can be ignored if you have middleware refreshing
           // user sessions.
         }
-      }
-    }
+      },
+    },
   });
 }
