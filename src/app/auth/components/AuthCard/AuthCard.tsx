@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Eye, EyeOff, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, CircleCheck, CircleAlert, Circle } from "lucide-react";
 
 type AuthCardProps = {
   authType: "login" | "signup" | "account-recovery" | "update-password";
@@ -66,6 +66,13 @@ export default function AuthCard({ authType }: AuthCardProps) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const ValidationIcon = ({ status }: { status: Status }) => {
+    if (status === "success") return <CircleCheck className="h-4 w-4 text-green-600" />;
+    if (status === "warning") return <CircleAlert className="h-4 w-4 text-destructive" />;
+    // fallback is neutral
+    return <Circle className="h-4 w-4 text-muted-foreground" />;
+  };
 
   // authenticate user client-side before allowing them to changing password
   // -- needs to be done to authenticate using url query param "code" from the password recovery email link
@@ -281,14 +288,6 @@ export default function AuthCard({ authType }: AuthCardProps) {
   if (isLoading) {
     return <></>;
   }
-
-  const ValidationIcon = ({ status }: { status: Status }) => {
-    if (status === "success") return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-    if (status === "error") return <XCircle className="h-4 w-4 text-destructive" />;
-    if (status === "warning") return <XCircle className="h-4 w-4 text-muted-foreground" />;
-    // fallback is neutral
-    return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
-  };
 
   return (
     <div className="flex min-h-screen items-center justify-center p-4 bg-background">
