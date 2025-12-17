@@ -284,7 +284,9 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
   const ValidationIcon = ({ status }: { status: Status }) => {
     if (status === "success") return <CheckCircle2 className="h-4 w-4 text-green-600" />;
-    if (status === "warning") return <XCircle className="h-4 w-4 text-destructive" />;
+    if (status === "error") return <XCircle className="h-4 w-4 text-destructive" />;
+    if (status === "warning") return <XCircle className="h-4 w-4 text-muted-foreground" />;
+    // fallback is neutral
     return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
   };
 
@@ -343,7 +345,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
                     {passwordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                   </button>
                 </div>
-                {(authType === "signup" || authType === "update-password") && passwordTouched && (
+                {(authType === "signup" || authType === "update-password") && (
                   <div className="space-y-1 text-sm">
                     <div className="flex items-center gap-2">
                       <ValidationIcon status={passwordLength} />
