@@ -1,5 +1,10 @@
+import { Suspense } from "react";
 import AuthCard from "../components/AuthCard/AuthCard";
 
 export default function SignupPage() {
-  return <AuthCard authType="signup" />;
+  return (
+    <Suspense fallback={<div />}>
+      <AuthCard authType="signup" />
+    </Suspense>
+  );
 }
