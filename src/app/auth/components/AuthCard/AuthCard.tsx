@@ -182,12 +182,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
     if (authType === "signup") {
       const userExists = await isEmailRegistered(email);
       if (userExists) {
-        toast.error("An account with this email already exists", {
-          action: {
-            label: "Log In",
-            onClick: () => router.push("/auth/login"),
-          },
-        });
+        toast.error("An account with this email already exists");
         setIsSubmitting(false);
         return;
       }
@@ -198,12 +193,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
     if (authType === "account-recovery") {
       const userExists = await isEmailRegistered(email);
       if (!userExists) {
-        toast.error("No account with this email exists", {
-          action: {
-            label: "Sign Up",
-            onClick: () => router.push("/auth/signup"),
-          },
-        });
+        toast.error("No account with this email exists");
         setIsSubmitting(false);
         return;
       }
