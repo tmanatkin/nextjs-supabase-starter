@@ -3,23 +3,27 @@ import { NextResponse, type NextRequest } from "next/server";
 
 export async function updateSession(request: NextRequest) {
   let supabaseResponse = NextResponse.next({
-    request
+    request,
   });
 
-  const supabase = createServerClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
-    cookies: {
-      getAll() {
-        return request.cookies.getAll();
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll(cookiesToSet) {
+          cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
+          supabaseResponse = NextResponse.next({
+            request,
+          });
+          cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options));
+        },
       },
-      setAll(cookiesToSet) {
-        cookiesToSet.forEach(({ name, value }) => request.cookies.set(name, value));
-        supabaseResponse = NextResponse.next({
-          request
-        });
-        cookiesToSet.forEach(({ name, value, options }) => supabaseResponse.cookies.set(name, value, options));
-      }
     }
-  });
+  );
 
   // Do not run code between createServerClient and
   // supabase.auth.getUser(). A simple mistake could make it very hard to debug
@@ -28,11 +32,11 @@ export async function updateSession(request: NextRequest) {
   // IMPORTANT: DO NOT REMOVE auth.getUser()
 
   const {
-    data: { user }
+    data: { user },
   } = await supabase.auth.getUser();
 
   // non authenticated can only access /auth or /info/[slug]
-  // -- the exeption to this is the initial loading of /auth/update-password
+  // -- the exception to this is the initial loading of /auth/update-password
   // -- non authenticated users CAN access this page, but will be instantly redirected if the client cannot authenticate
   // -- the client authenticates by using the url query param "code" from the password recovery email link
   if (!user && !(request.nextUrl.pathname.startsWith("/auth") || request.nextUrl.pathname.startsWith("/info"))) {
