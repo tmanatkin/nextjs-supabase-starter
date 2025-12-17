@@ -1,17 +1,18 @@
 "use client";
 
-import "./authCard.scss";
 import { isEmailRegistered, login, signup, sendPasswordRecovery, updatePassword } from "../../actions";
 import { Status } from "@/types/Status";
 import { useState, useEffect } from "react";
 import useDebounce from "../../../../hooks/useDebounce";
-import SubmitButton from "./SubmitButton/SubmitButton";
-import Toast from "../../../../components/Toast/Toast";
-import InputSideIcon from "./InputSideIcon/InputSideIcon";
-import InputIconGroup from "./InputIconGroup/InputIconGroup";
 import Link from "next/link";
 import { createClientsideClient } from "@/utils/supabase/client";
 import { useRouter, useSearchParams } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { toast } from "sonner";
+import { Eye, EyeOff, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
 
 type AuthCardProps = {
   authType: "login" | "signup" | "account-recovery" | "update-password";
@@ -63,10 +64,8 @@ export default function AuthCard({ authType }: AuthCardProps) {
   const [passwordMatch, setPasswordMatch] = useState<Status>("neutral");
 
   const [passwordVisible, setPasswordVisible] = useState(false);
-
-  const [message, setMessage] = useState<{ message: React.ReactNode; type: Status } | null>(null);
-
   const [isLoading, setIsLoading] = useState(true);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   // authenticate user client-side before allowing them to changing password
   // -- needs to be done to authenticate using url query param "code" from the password recovery email link
@@ -120,7 +119,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
     return validConfirmPassword;
   };
 
-  // validate email on inital load for account-recovery when using email query param
+  // validate email on initial load for account-recovery when using email query param
   useEffect(() => {
     if (authType === "account-recovery" && paramEmail !== "") {
       validateEmail();
@@ -155,16 +154,18 @@ export default function AuthCard({ authType }: AuthCardProps) {
   // handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setMessage(null);
+    setIsSubmitting(true);
 
     // email
     // login, signup, and account-recovery
     if (authType === "login" || authType === "signup" || authType === "account-recovery") {
       if (!email) {
-        setMessage({ message: "Email is required", type: "error" });
+        toast.error("Email is required");
+        setIsSubmitting(false);
         return;
       } else if (!validateEmail()) {
-        setMessage({ message: "Enter a valid email", type: "error" });
+        toast.error("Enter a valid email");
+        setIsSubmitting(false);
         return;
       }
     }
@@ -174,16 +175,13 @@ export default function AuthCard({ authType }: AuthCardProps) {
     if (authType === "signup") {
       const userExists = await isEmailRegistered(email);
       if (userExists) {
-        setMessage({
-          message: (
-            <>
-              An account with this email already exists
-              <br />
-              <Link href="/auth/login">Log In</Link> instead?
-            </>
-          ),
-          type: "error"
+        toast.error("An account with this email already exists", {
+          action: {
+            label: "Log In",
+            onClick: () => router.push("/auth/login"),
+          },
         });
+        setIsSubmitting(false);
         return;
       }
     }
@@ -193,16 +191,13 @@ export default function AuthCard({ authType }: AuthCardProps) {
     if (authType === "account-recovery") {
       const userExists = await isEmailRegistered(email);
       if (!userExists) {
-        setMessage({
-          message: (
-            <>
-              No account with this email exists
-              <br />
-              <Link href="/auth/signup">Sign Up</Link> instead?
-            </>
-          ),
-          type: "error"
+        toast.error("No account with this email exists", {
+          action: {
+            label: "Sign Up",
+            onClick: () => router.push("/auth/signup"),
+          },
         });
+        setIsSubmitting(false);
         return;
       }
     }
@@ -211,10 +206,12 @@ export default function AuthCard({ authType }: AuthCardProps) {
     // login, signup, and update-password
     if (authType === "signup" || authType === "login" || authType === "update-password") {
       if (!password) {
-        setMessage({ message: "Password is required", type: "error" });
+        toast.error("Password is required");
+        setIsSubmitting(false);
         return;
-      } else if (!validatePassword()) {
-        setMessage({ message: "Enter a valid password", type: "error" });
+      } else if ((authType === "signup" || authType === "update-password") && !validatePassword()) {
+        toast.error("Enter a valid password");
+        setIsSubmitting(false);
         return;
       }
     }
@@ -223,15 +220,18 @@ export default function AuthCard({ authType }: AuthCardProps) {
     // signup and update-password
     if (authType === "signup" || authType === "update-password") {
       if (!confirmPassword) {
-        setMessage({ message: "Confirm password is required", type: "error" });
+        toast.error("Confirm password is required");
+        setIsSubmitting(false);
         return;
       } else if (!validateConfirmPassword()) {
-        setMessage({ message: "Passwords must match", type: "error" });
+        toast.error("Passwords must match");
+        setIsSubmitting(false);
         return;
       }
     }
 
-    authenticateSubmission();
+    await authenticateSubmission();
+    setIsSubmitting(false);
   };
 
   // authenticate with supabase
@@ -257,9 +257,9 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
     // error handling
     if (result?.error) {
-      setMessage({ message: result.error, type: "error" });
+      toast.error(result.error);
     }
-    // redirect user to home page for login, and update-assword
+    // redirect user to home page for login and update-password
     else if (authType === "login" || authType === "update-password") {
       window.location.href = "/"; // full page reload
     }
@@ -269,11 +269,11 @@ export default function AuthCard({ authType }: AuthCardProps) {
     }
     // notify user that recovery email was sent
     else if (authType === "account-recovery") {
-      setMessage({ message: "Recovery email sent", type: "success" });
+      toast.success("Recovery email sent");
     }
     // catch if unexpected authType (should never happen)
     else {
-      setMessage({ message: "Unexpected error occurred", type: "error" });
+      toast.error("Unexpected error occurred");
     }
   };
 
@@ -282,111 +282,160 @@ export default function AuthCard({ authType }: AuthCardProps) {
     return <></>;
   }
 
+  const ValidationIcon = ({ status }: { status: Status }) => {
+    if (status === "success") return <CheckCircle2 className="h-4 w-4 text-green-600" />;
+    if (status === "warning") return <XCircle className="h-4 w-4 text-destructive" />;
+    return <AlertCircle className="h-4 w-4 text-muted-foreground" />;
+  };
+
   return (
-    <div className="auth-card">
-      <h2 className="auth-card-title">{authTitle}</h2>
-      <form className="auth-card-form" onSubmit={handleSubmit}>
-        {/* email */}
-        {(authType === "login" || authType === "signup" || authType === "account-recovery") && (
-          <InputSideIcon label="Email" hideIcon={authType === "login"} mode="validityCheck" status={emailValidity}>
-            <input
-              className="auth-card-form-input"
-              id="auth-card-form-email"
-              type="text"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              onFocus={() => setEmailTouched(true)}
-            />
-          </InputSideIcon>
-        )}
+    <div className="flex min-h-screen items-center justify-center p-4 bg-background">
+      <Card className="w-full max-w-md">
+        <CardHeader>
+          <CardTitle className="text-2xl">{authTitle}</CardTitle>
+          {authType === "account-recovery" && (
+            <CardDescription>Enter your email to receive a password reset link</CardDescription>
+          )}
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Email Input */}
+            {(authType === "login" || authType === "signup" || authType === "account-recovery") && (
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <div className="relative">
+                  <Input
+                    id="email"
+                    type="text"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    onFocus={() => setEmailTouched(true)}
+                    className={
+                      authType !== "login" && emailTouched && emailValidity === "warning" ? "border-destructive" : ""
+                    }
+                  />
+                  {authType !== "login" && emailTouched && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <ValidationIcon status={emailValidity} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
-        {/* password */}
-        {(authType === "login" || authType === "signup" || authType === "update-password") && (
-          <InputIconGroup
-            hideIcons={authType === "login"}
-            validityStatuses={[
-              { label: "8 Characters", status: passwordLength },
-              { label: "Uppercase", status: passwordUpper },
-              { label: "Number", status: passwordNumber },
-              { label: "Special Character", status: passwordSpecial }
-            ]}
-          >
-            <InputSideIcon
-              label={authType === "update-password" ? "New Password" : "Password"}
-              mode="visibilityToggle"
-              toggleIcon={passwordVisible}
-              onToggle={() => setPasswordVisible(!passwordVisible)}
-            >
-              <input
-                className="auth-card-form-input"
-                id="auth-card-form-password"
-                type={passwordVisible ? "text" : "password"}
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                onFocus={() => {
-                  setPasswordTouched(true);
-                }}
-              />
-            </InputSideIcon>
-          </InputIconGroup>
-        )}
+            {/* Password Input */}
+            {(authType === "login" || authType === "signup" || authType === "update-password") && (
+              <div className="space-y-2">
+                <Label htmlFor="password">{authType === "update-password" ? "New Password" : "Password"}</Label>
+                <div className="relative">
+                  <Input
+                    id="password"
+                    type={passwordVisible ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onFocus={() => setPasswordTouched(true)}
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setPasswordVisible(!passwordVisible)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    {passwordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
+                {(authType === "signup" || authType === "update-password") && passwordTouched && (
+                  <div className="space-y-1 text-sm">
+                    <div className="flex items-center gap-2">
+                      <ValidationIcon status={passwordLength} />
+                      <span>8 Characters</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ValidationIcon status={passwordUpper} />
+                      <span>Uppercase</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ValidationIcon status={passwordNumber} />
+                      <span>Number</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <ValidationIcon status={passwordSpecial} />
+                      <span>Special Character</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
 
-        {/* confirm password */}
-        {(authType === "signup" || authType === "update-password") && (
-          <InputSideIcon
-            label={authType === "update-password" ? "Confirm New Password" : "Confirm Password"}
-            mode="validityCheck"
-            status={passwordMatch}
-          >
-            <input
-              className="auth-card-form-input"
-              id="auth-card-form-confirm-password"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              onFocus={() => {
-                setConfirmPasswordTouched(true);
-              }}
-            />
-          </InputSideIcon>
-        )}
+            {/* Confirm Password Input */}
+            {(authType === "signup" || authType === "update-password") && (
+              <div className="space-y-2">
+                <Label htmlFor="confirm-password">
+                  {authType === "update-password" ? "Confirm New Password" : "Confirm Password"}
+                </Label>
+                <div className="relative">
+                  <Input
+                    id="confirm-password"
+                    type="password"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onFocus={() => setConfirmPasswordTouched(true)}
+                    className={confirmPasswordTouched && passwordMatch === "warning" ? "border-destructive" : ""}
+                  />
+                  {confirmPasswordTouched && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2">
+                      <ValidationIcon status={passwordMatch} />
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
 
-        {/* submit button */}
-        <SubmitButton label={authButtonLabel ?? ""}></SubmitButton>
+            {/* Submit Button */}
+            <Button type="submit" className="w-full" disabled={isSubmitting}>
+              {isSubmitting ? "Loading..." : authButtonLabel}
+            </Button>
 
-        {/* auth navigation link */}
-        <div className="auth-nav-link">
-          {authType === "login" ? (
-            <>
-              <p>
-                {"Don't have an account? "}
-                <Link href="/auth/signup">Sign Up</Link>
-              </p>
-              <p>
-                <button
-                  className="button-link"
-                  onClick={() => router.push(`/auth/account-recovery${email ? `?email=${encodeURIComponent(email)}` : ""}`)}
-                >
-                  Forgot Password?
-                </button>
-              </p>
-            </>
-          ) : authType === "signup" ? (
-            <p>
-              {"Already have an account? "}
-              <Link href="/auth/login">Log In</Link>
-            </p>
-          ) : authType === "account-recovery" ? (
-            <p>
-              {"Remember your password? "}
-              <Link href="/auth/login">Log In</Link>
-            </p>
-          ) : authType === "update-password" ? null : null}
-        </div>
-
-        {/* error message */}
-        {message && <Toast message={message.message} type={message.type} onClose={() => setMessage(null)} duration={5000} />}
-      </form>
+            {/* Auth Navigation Links */}
+            <div className="space-y-2 text-center text-sm">
+              {authType === "login" && (
+                <>
+                  <p className="text-muted-foreground">
+                    Don&apos;t have an account?{" "}
+                    <Link href="/auth/signup" className="text-primary hover:underline">
+                      Sign Up
+                    </Link>
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() =>
+                      router.push(`/auth/account-recovery${email ? `?email=${encodeURIComponent(email)}` : ""}`)
+                    }
+                    className="text-primary hover:underline"
+                  >
+                    Forgot Password?
+                  </button>
+                </>
+              )}
+              {authType === "signup" && (
+                <p className="text-muted-foreground">
+                  Already have an account?{" "}
+                  <Link href="/auth/login" className="text-primary hover:underline">
+                    Log In
+                  </Link>
+                </p>
+              )}
+              {authType === "account-recovery" && (
+                <p className="text-muted-foreground">
+                  Remember your password?{" "}
+                  <Link href="/auth/login" className="text-primary hover:underline">
+                    Log In
+                  </Link>
+                </p>
+              )}
+            </div>
+          </form>
+        </CardContent>
+      </Card>
     </div>
   );
 }
