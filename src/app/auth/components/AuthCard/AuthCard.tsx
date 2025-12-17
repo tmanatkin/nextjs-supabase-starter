@@ -311,9 +311,6 @@ export default function AuthCard({ authType }: AuthCardProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={() => setEmailTouched(true)}
-                    className={
-                      authType !== "login" && emailTouched && emailValidity === "warning" ? "border-destructive" : ""
-                    }
                   />
                   {authType !== "login" && emailTouched && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -380,7 +377,6 @@ export default function AuthCard({ authType }: AuthCardProps) {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     onFocus={() => setConfirmPasswordTouched(true)}
-                    className={confirmPasswordTouched && passwordMatch === "warning" ? "border-destructive" : ""}
                   />
                   {confirmPasswordTouched && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">

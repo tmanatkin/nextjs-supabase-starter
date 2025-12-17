@@ -43,7 +43,7 @@ const config: Config = {
         },
         border: "var(--border)",
         input: "var(--input)",
-        ring: "var(--ring)",
+        // ring: "var(--ring)",
         chart: {
           "1": "var(--chart-1)",
           "2": "var(--chart-2)",
