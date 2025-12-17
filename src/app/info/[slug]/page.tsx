@@ -17,7 +17,7 @@ const infoCardContent: Record<string, InfoCardContent> = {
   }
 };
 
-export default async function InfoSlugPage({ params }: { params: { slug: string } }) {
+export default async function InfoSlugPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const content = infoCardContent[slug] || {
     title: "Unknown Info Page",
