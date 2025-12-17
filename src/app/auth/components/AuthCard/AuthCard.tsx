@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Eye, EyeOff, CircleCheck, CircleAlert, Circle } from "lucide-react";
+import { Eye, EyeOff, CircleCheckBig, CircleAlert, Circle } from "lucide-react";
 
 type AuthCardProps = {
   authType: "login" | "signup" | "account-recovery" | "update-password";
@@ -68,7 +68,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const ValidationIcon = ({ status }: { status: Status }) => {
-    if (status === "success") return <CircleCheck className="h-5 w-5 text-green-600" />;
+    if (status === "success") return <CircleCheckBig className="h-5 w-5 text-green-600" />;
     if (status === "warning") return <CircleAlert className="h-5 w-5 text-destructive" />;
     // fallback is neutral
     return <Circle className="h-5 w-5 text-muted-foreground" />;
