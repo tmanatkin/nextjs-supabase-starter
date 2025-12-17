@@ -342,7 +342,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
                   </button>
                 </div>
                 {(authType === "signup" || authType === "update-password") && (
-                  <div className="space-y-1 text-sm">
+                  <div className="grid grid-cols-2 gap-x-3 gap-y-2 text-sm">
                     <div className="flex items-center gap-2">
                       <ValidationIcon status={passwordLength} />
                       <span>8 Characters</span>
