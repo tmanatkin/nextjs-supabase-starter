@@ -68,10 +68,10 @@ export default function AuthCard({ authType }: AuthCardProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const ValidationIcon = ({ status }: { status: Status }) => {
-    if (status === "success") return <CircleCheck className="h-4 w-4 text-green-600" />;
-    if (status === "warning") return <CircleAlert className="h-4 w-4 text-destructive" />;
+    if (status === "success") return <CircleCheck className="h-5 w-5 text-green-600" />;
+    if (status === "warning") return <CircleAlert className="h-5 w-5 text-destructive" />;
     // fallback is neutral
-    return <Circle className="h-4 w-4 text-muted-foreground" />;
+    return <Circle className="h-5 w-5 text-muted-foreground" />;
   };
 
   // authenticate user client-side before allowing them to changing password
@@ -311,6 +311,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     onFocus={() => setEmailTouched(true)}
+                    className="pr-8"
                   />
                   {authType !== "login" && emailTouched && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
@@ -332,13 +333,14 @@ export default function AuthCard({ authType }: AuthCardProps) {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     onFocus={() => setPasswordTouched(true)}
+                    className="pr-8"
                   />
                   <button
                     type="button"
                     onClick={() => setPasswordVisible(!passwordVisible)}
                     className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                   >
-                    {passwordVisible ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {passwordVisible ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
                 {(authType === "signup" || authType === "update-password") && (
@@ -377,6 +379,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
                     value={confirmPassword}
                     onChange={(e) => setConfirmPassword(e.target.value)}
                     onFocus={() => setConfirmPasswordTouched(true)}
+                    className="pr-8"
                   />
                   {confirmPasswordTouched && (
                     <div className="absolute right-3 top-1/2 -translate-y-1/2">
