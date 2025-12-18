@@ -4,7 +4,7 @@ import Link from "next/link";
 import { logout } from "./auth/actions";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 export default function RootPage() {
   const router = useRouter();
@@ -20,15 +20,19 @@ export default function RootPage() {
       <Card className="w-full max-w-md">
         <CardHeader>
           <CardTitle>Welcome</CardTitle>
-          <CardDescription>You are logged in</CardDescription>
         </CardHeader>
         <CardContent className="space-y-2">
-          <Button onClick={handleLogout} variant="outline" className="w-full">
-            Logout
+          <Button asChild className="w-full">
+            <Link href="/risk-assessment">Take Risk Assessment</Link>
           </Button>
-          <Button asChild variant="outline" className="w-full">
-            <Link href="/auth/update-password">Update Password</Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button onClick={handleLogout} variant="outline" className="w-1/2">
+              Logout
+            </Button>
+            <Button asChild variant="outline" className="w-1/2">
+              <Link href="/auth/update-password">Update Password</Link>
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
