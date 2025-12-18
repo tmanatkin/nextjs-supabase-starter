@@ -81,6 +81,12 @@ export default function AuthCard({ authType }: AuthCardProps) {
       // only need supabase clientside client if changing password
       if (authType === "update-password") {
         const supabase = createClientsideClient();
+        // ensure the recovery code is exchanged for a session when coming from email link
+        try {
+          await supabase.auth.exchangeCodeForSession(window.location.href);
+        } catch {
+          // ignore; getUser below will handle missing session
+        }
         const { error } = await supabase.auth.getUser();
         // if not authenticated, redirect to error page
         if (error) {
