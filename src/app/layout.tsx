@@ -9,7 +9,7 @@ const openSans = Open_Sans({
 });
 
 export const metadata: Metadata = {
-  title: "title",
+  title: "Insurance Agency",
   description: "description",
 };
 
