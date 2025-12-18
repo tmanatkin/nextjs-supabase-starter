@@ -12,7 +12,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "sonner";
-import { Eye, EyeOff, CircleCheckBig, CircleAlert, Circle } from "lucide-react";
+import { Eye, EyeOff, CircleCheckBig, CircleAlert, Circle, LoaderCircle } from "lucide-react";
 
 type AuthCardProps = {
   authType: "login" | "signup" | "account-recovery" | "update-password";
@@ -382,7 +382,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
 
             {/* Submit Button */}
             <Button type="submit" className="w-full" disabled={isSubmitting}>
-              {isSubmitting ? "Loading..." : authButtonLabel}
+              {isSubmitting ? <LoaderCircle className="h-4 w-4 animate-spin" /> : authButtonLabel}
             </Button>
 
             {/* Auth Navigation Links */}
