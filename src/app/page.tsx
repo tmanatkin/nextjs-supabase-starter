@@ -29,9 +29,6 @@ export default function RootPage() {
           <CardTitle>Welcome</CardTitle>
         </CardHeader>
         <CardContent className="space-y-2">
-          <Button asChild className="w-full">
-            <Link href="/risk-assessment">Take Risk Assessment</Link>
-          </Button>
           <div className="flex gap-2">
             <Button onClick={handleLogout} variant="outline" className="w-1/2" disabled={isLoggingOut}>
               {isLoggingOut ? <LoaderCircle className="h-4 w-4 animate-spin" /> : "Logout"}
