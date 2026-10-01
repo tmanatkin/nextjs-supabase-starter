@@ -18,6 +18,13 @@ type AuthCardProps = {
   authType: "login" | "signup" | "account-recovery" | "update-password";
 };
 
+const ValidationIcon = ({ status }: { status: Status }) => {
+  if (status === "success") return <CircleCheckBig className="h-5 w-5 text-green-600" />;
+  if (status === "warning") return <CircleAlert className="h-5 w-5 text-destructive" />;
+  // fallback is neutral
+  return <Circle className="h-5 w-5 text-muted-foreground" />;
+};
+
 export default function AuthCard({ authType }: AuthCardProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -66,13 +73,6 @@ export default function AuthCard({ authType }: AuthCardProps) {
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const ValidationIcon = ({ status }: { status: Status }) => {
-    if (status === "success") return <CircleCheckBig className="h-5 w-5 text-green-600" />;
-    if (status === "warning") return <CircleAlert className="h-5 w-5 text-destructive" />;
-    // fallback is neutral
-    return <Circle className="h-5 w-5 text-muted-foreground" />;
-  };
 
   // authenticate user client-side before allowing them to changing password
   // -- needs to be done to authenticate using url query param "code" from the password recovery email link
@@ -135,6 +135,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
   // validate email on initial load for account-recovery when using email query param
   useEffect(() => {
     if (authType === "account-recovery" && paramEmail !== "") {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       validateEmail();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -143,6 +144,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
   // debounce email validation for warnings
   useEffect(() => {
     if ((authType === "signup" || authType === "account-recovery") && emailTouched) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       validateEmail();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -151,6 +153,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
   // debounce password validation for warnings
   useEffect(() => {
     if ((authType === "signup" || authType === "update-password") && passwordTouched) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       validatePassword();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -159,6 +162,7 @@ export default function AuthCard({ authType }: AuthCardProps) {
   // debounce confirm password validation for warnings
   useEffect(() => {
     if ((authType === "signup" || authType === "update-password") && confirmPasswordTouched) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       validateConfirmPassword();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps

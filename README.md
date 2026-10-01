@@ -11,5 +11,5 @@ Starter template for a Next.js app with Supabase authentication.
 - Email sign-up with verification, login, and logout
 - Password recovery and password updates
 - Live form validation with password strength requirements
-- Session handling through Next.js middleware
+- Session handling through Next.js proxy
 - Used as the base for [Insurance Risk Assessment](https://github.com/tmanatkin/insurance-risk-assessment)
