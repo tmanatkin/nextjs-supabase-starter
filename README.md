@@ -8,6 +8,8 @@ Starter template for a Next.js app with Supabase authentication.
 ![shadcn](https://img.shields.io/badge/shadcn-222222?style=for-the-badge&logo=shadcnui)
 ![Tailwind](https://img.shields.io/badge/Tailwind-222222?style=for-the-badge&logo=tailwindcss)
 
+<img src=".github/preview.png" width="640" alt="Next.js Supabase Starter">
+
 - Used as the base for [Insurance Risk Assessment](https://github.com/tmanatkin/insurance-risk-assessment)
 - Email sign-up with verification, login, and logout
 - Password recovery and password updates
